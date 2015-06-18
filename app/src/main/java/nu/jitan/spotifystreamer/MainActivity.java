@@ -10,8 +10,10 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.SearchView;
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 import java.util.List;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -25,20 +27,24 @@ import trikita.log.Log;
 public class MainActivity extends AppCompatActivity {
 
     private SpotifyService mSpotifyService;
-    private SearchView mSearchView;
+    private SearchAdapter mSearchAdapter;
+    @InjectView(R.id.searchview) SearchView mSearchView;
+    @InjectView(R.id.listview_search) ListView mSearchResultList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.inject(this);
         mSpotifyService = new SpotifyApi().getService();
-
+        mSearchAdapter = new SearchAdapter(this);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        mSearchView = ButterKnife.findById(this, R.id.searchView);
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         mSearchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         mSearchView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+
+        mSearchResultList.setAdapter(mSearchAdapter);
 
         removeMagnifierFromSearchView();
     }
@@ -68,10 +74,19 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void success(ArtistsPager artistsPager, Response response) {
-                List<Artist> artistList = artistsPager.artists.items;
+                final List<Artist> artistList = artistsPager.artists.items;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSearchAdapter.clear();
+                        mSearchAdapter.addAll(artistList);
+
+                    }
+                });
                 for (Artist artist : artistList) {
                     Log.d(artist.name);
                 }
+
             }
 
             @Override

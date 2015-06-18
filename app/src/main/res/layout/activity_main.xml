@@ -10,12 +10,12 @@
     tools:context=".MainActivity"
     >
     <SearchView
-        android:id="@+id/searchView"
+        android:id="@+id/searchview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />
     <ListView
-        android:id="@android:id/list"
+        android:id="@+id/listview_search"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
