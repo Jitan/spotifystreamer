@@ -75,13 +75,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void success(ArtistsPager artistsPager, Response response) {
                 final List<Artist> artistList = artistsPager.artists.items;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSearchAdapter.clear();
-                        mSearchAdapter.addAll(artistList);
+                runOnUiThread(() -> {
+                    mSearchAdapter.clear();
+                    mSearchAdapter.addAll(artistList);
 
-                    }
                 });
                 for (Artist artist : artistList) {
                     Log.d(artist.name);
