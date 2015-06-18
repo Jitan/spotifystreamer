@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import com.squareup.picasso.Picasso;
 import kaaes.spotify.webapi.android.models.Artist;
 
 public class SearchAdapter extends ArrayAdapter<Artist> {
@@ -25,15 +26,28 @@ public class SearchAdapter extends ArrayAdapter<Artist> {
         if (convertView != null) {
             mHolder = (ViewHolder) convertView.getTag();
         } else {
-            convertView = mInflater.inflate(R.layout.list_item_search, parent, false);
+            convertView = mInflater.inflate(R.layout.listitem_search, parent, false);
             mHolder = new ViewHolder(convertView);
             convertView.setTag(mHolder);
         }
 
-        mHolder.textView.setText(getItem(position).name);
+        Artist artist = getItem(position);
+
+        mHolder.textView.setText(artist.name);
+        if (artist.images.size() > 0) {
+            String artistThumbUrl = artist.images.get(0).url;
+            Picasso.with(getContext())
+                .load(artistThumbUrl)
+                .resizeDimen(R.dimen.listitem_search_imageview, R.dimen
+                    .listitem_search_imageview)
+                .centerCrop()
+                .into(mHolder.imageView);
+        }
 
         return convertView;
     }
+
+    
 
     static class ViewHolder {
         @InjectView(R.id.listitem_search_imageview) ImageView imageView;
