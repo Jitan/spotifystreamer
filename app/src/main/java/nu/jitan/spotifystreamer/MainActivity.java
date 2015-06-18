@@ -1,13 +1,16 @@
 package nu.jitan.spotifystreamer;
 
-import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
+import butterknife.ButterKnife;
 import java.util.List;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -18,9 +21,10 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import trikita.log.Log;
 
-public class MainActivity extends ListActivity {
+public class MainActivity extends AppCompatActivity {
 
     private SpotifyService mSpotifyService;
+    private SearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,13 +34,21 @@ public class MainActivity extends ListActivity {
 
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) findViewById(R.id.searchView);
+        mSearchView = ButterKnife.findById(this, R.id.searchView);
         // Assumes current activity is the searchable activity
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
 
         handleIntent(getIntent());
+
+        removeMagnifierFromSearchView();
+    }
+
+    private void removeMagnifierFromSearchView() {
+        int magId = getResources().getIdentifier("android:id/search_mag_icon", null,
+            null);
+        ImageView magImage = ButterKnife.findById(mSearchView, magId);
+        magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
     }
 
     @Override
