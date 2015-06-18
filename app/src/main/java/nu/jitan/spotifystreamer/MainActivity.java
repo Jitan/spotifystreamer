@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
@@ -32,14 +33,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mSpotifyService = new SpotifyApi().getService();
 
-        // Get the SearchView and set the searchable configuration
+
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         mSearchView = ButterKnife.findById(this, R.id.searchView);
-        // Assumes current activity is the searchable activity
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         mSearchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-
-        handleIntent(getIntent());
+        mSearchView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
 
         removeMagnifierFromSearchView();
     }
