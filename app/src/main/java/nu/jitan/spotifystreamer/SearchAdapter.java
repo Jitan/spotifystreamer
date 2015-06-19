@@ -47,8 +47,6 @@ public class SearchAdapter extends ArrayAdapter<Artist> {
         return convertView;
     }
 
-    
-
     static class ViewHolder {
         @InjectView(R.id.listitem_search_imageview) ImageView imageView;
         @InjectView(R.id.listitem_search_textview) TextView textView;
