@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import java.util.List;
@@ -75,9 +76,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void success(ArtistsPager artistsPager, Response response) {
                 final List<Artist> artistList = artistsPager.artists.items;
+
                 runOnUiThread(() -> {
-                    mSearchAdapter.clear();
-                    mSearchAdapter.addAll(artistList);
+                    if (artistList.size() == 0) {
+                        Toast.makeText(getApplicationContext(), "No artist found", Toast
+                            .LENGTH_SHORT).show();
+                    } else {
+                        mSearchAdapter.clear();
+                        mSearchAdapter.addAll(artistList);
+                    }
+
 
                 });
                 for (Artist artist : artistList) {
