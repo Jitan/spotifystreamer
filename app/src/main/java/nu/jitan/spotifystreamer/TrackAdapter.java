@@ -10,13 +10,12 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.squareup.picasso.Picasso;
-import kaaes.spotify.webapi.android.models.Artist;
 
-public class SearchAdapter extends ArrayAdapter<Artist> {
+public class TrackAdapter extends ArrayAdapter<MyTrack> {
     private ViewHolder mHolder;
     private LayoutInflater mInflater;
 
-    public SearchAdapter(Context context) {
+    public TrackAdapter(Context context) {
         super(context, 0);
         mInflater = LayoutInflater.from(context);
     }
@@ -31,13 +30,12 @@ public class SearchAdapter extends ArrayAdapter<Artist> {
             convertView.setTag(mHolder);
         }
 
-        Artist artist = getItem(position);
+        MyTrack track = getItem(position);
 
-        mHolder.textView.setText(artist.name);
-        if (artist.images.size() > 0) {
-            String artistThumbUrl = artist.images.get(0).url;
+        mHolder.textView.setText(track.getAlbumName() + " - " + track.getTrackName());
+        if (!track.getImgUrl().isEmpty()) {
             Picasso.with(getContext())
-                .load(artistThumbUrl)
+                .load(track.getImgUrl())
                 .resizeDimen(R.dimen.listitem_imageview, R.dimen
                     .listitem_imageview)
                 .centerCrop()

@@ -5,14 +5,14 @@
     android:layout_height="@dimen/listitem_height">
 
     <ImageView
-        android:id="@+id/listitem_search_imageview"
+        android:id="@+id/listitem_track_imageview"
         android:layout_width="@dimen/listitem_imageview"
         android:layout_height="@dimen/listitem_imageview"
-        android:contentDescription="@string/artist_thumbnail"
+        android:contentDescription="@string/album_thumbnail"
         android:layout_gravity="center_vertical"
         />
     <TextView
-        android:id="@+id/listitem_search_textview"
+        android:id="@+id/listitem_track_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"

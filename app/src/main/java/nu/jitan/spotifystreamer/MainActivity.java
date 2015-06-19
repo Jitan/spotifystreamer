@@ -15,18 +15,23 @@ import android.widget.SearchView;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnItemClick;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import kaaes.spotify.webapi.android.models.Track;
+import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import trikita.log.Log;
 
 public class MainActivity extends AppCompatActivity {
-
     private SpotifyService mSpotifyService;
     private SearchAdapter mSearchAdapter;
     @InjectView(R.id.searchview) SearchView mSearchView;
@@ -40,12 +45,86 @@ public class MainActivity extends AppCompatActivity {
         mSpotifyService = new SpotifyApi().getService();
         mSearchAdapter = new SearchAdapter(this);
 
+        mSearchResultList.setAdapter(mSearchAdapter);
+        setupSearchView();
+    }
+
+    private void searchArtist(String searchQuery) {
+        mSpotifyService.searchArtists(searchQuery, new Callback<ArtistsPager>() {
+
+            @Override
+            public void success(ArtistsPager artistsPager, Response response) {
+                final List<Artist> artistList = artistsPager.artists.items;
+
+                runOnUiThread(() -> {
+                    if (artistList.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), "No artist found", Toast
+                            .LENGTH_SHORT).show();
+                    } else {
+                        mSearchAdapter.clear();
+                        mSearchAdapter.addAll(artistList);
+                        mSearchResultList.setSelection(0);
+                    }
+                });
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("RetrofitError when searching Artists: ", error.getMessage());
+            }
+        });
+    }
+
+    @OnItemClick(R.id.listview_search)
+    public void loadArtistTracks(int position) {
+        String artistId = mSearchAdapter.getItem(position).id;
+
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put(SpotifyService.COUNTRY, "SE");
+
+        mSpotifyService.getArtistTopTrack(artistId, queryParams, new Callback<Tracks>() {
+            @Override
+            public void success(Tracks tracks, Response response) {
+                Context context = getApplicationContext();
+                if (tracks.tracks.isEmpty()) {
+                    Toast.makeText(context, "No tracks found for this artist", Toast
+                        .LENGTH_SHORT).show();
+                } else {
+                    Intent loadTracksIntent = new Intent(context, TrackActivity.class);
+
+                    List<MyTrack> myTrackList = new ArrayList<>();
+
+                    String albumName, trackName, imgUrl;
+                    for (Track track : tracks.tracks) {
+                            albumName = track.album.name;
+                            trackName = track.name;
+
+                        if (track.album.images.size() > 0) {
+                            imgUrl = track.album.images.get(0).url;
+                        } else {
+                            imgUrl = "";
+                        }
+                        myTrackList.add(MyTrack.create(albumName, trackName, imgUrl));
+                    }
+
+                    loadTracksIntent.putExtra("tracks", MyTrackList.create(myTrackList));
+                    startActivity(loadTracksIntent);
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("RetrofitError when loading Artist Tracks: ", error.getMessage());
+            }
+        });
+
+    }
+
+    private void setupSearchView() {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         mSearchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         mSearchView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-
-        mSearchResultList.setAdapter(mSearchAdapter);
 
         removeMagnifierFromSearchView();
     }
@@ -68,37 +147,6 @@ public class MainActivity extends AppCompatActivity {
             String searchQuery = intent.getStringExtra(SearchManager.QUERY);
             searchArtist(searchQuery);
         }
-    }
-
-    private void searchArtist(String searchQuery) {
-        mSpotifyService.searchArtists(searchQuery, new Callback<ArtistsPager>() {
-
-            @Override
-            public void success(ArtistsPager artistsPager, Response response) {
-                final List<Artist> artistList = artistsPager.artists.items;
-
-                runOnUiThread(() -> {
-                    if (artistList.size() == 0) {
-                        Toast.makeText(getApplicationContext(), "No artist found", Toast
-                            .LENGTH_SHORT).show();
-                    } else {
-                        mSearchAdapter.clear();
-                        mSearchAdapter.addAll(artistList);
-                    }
-
-
-                });
-                for (Artist artist : artistList) {
-                    Log.d(artist.name);
-                }
-
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d("RetrofitError: ", error.toString());
-            }
-        });
     }
 
     @Override
