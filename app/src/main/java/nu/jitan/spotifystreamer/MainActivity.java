@@ -26,6 +26,8 @@ import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
+import nu.jitan.spotifystreamer.model.MyTrack;
+import nu.jitan.spotifystreamer.model.MyTrackList;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;

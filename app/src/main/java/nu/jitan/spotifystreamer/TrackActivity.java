@@ -9,6 +9,8 @@ import android.widget.ListView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import java.util.List;
+import nu.jitan.spotifystreamer.model.MyTrack;
+import nu.jitan.spotifystreamer.model.MyTrackList;
 
 
 public class TrackActivity extends AppCompatActivity {

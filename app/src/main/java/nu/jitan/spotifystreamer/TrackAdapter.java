@@ -10,6 +10,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.squareup.picasso.Picasso;
+import nu.jitan.spotifystreamer.model.MyTrack;
 
 public class TrackAdapter extends ArrayAdapter<MyTrack> {
     private ViewHolder mHolder;

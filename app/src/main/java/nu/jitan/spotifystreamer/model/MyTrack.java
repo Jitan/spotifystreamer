@@ -1,4 +1,4 @@
-package nu.jitan.spotifystreamer;
+package nu.jitan.spotifystreamer.model;
 
 import android.os.Parcelable;
 import auto.parcel.AutoParcel;
