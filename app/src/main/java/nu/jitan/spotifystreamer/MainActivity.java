@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                         myTrackList.add(MyTrack.create(albumName, trackName, imgUrl));
                     }
 
-                    loadTracksIntent.putExtra("tracks", MyTrackList.create(myTrackList));
+                    loadTracksIntent.putExtra(TrackActivity.TRACKLIST_KEY, MyTrackList.create(myTrackList));
                     startActivity(loadTracksIntent);
                 }
             }

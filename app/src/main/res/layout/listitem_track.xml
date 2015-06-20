@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/listitem_height">
+    android:gravity="center_vertical"
+    android:layout_height="@dimen/listitem_height"
+    >
 
     <ImageView
         android:id="@+id/listitem_track_imageview"
         android:layout_width="@dimen/listitem_imageview"
         android:layout_height="@dimen/listitem_imageview"
         android:contentDescription="@string/album_thumbnail"
-        android:layout_gravity="center_vertical"
         />
     <TextView
-        android:id="@+id/listitem_track_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:id="@+id/listitem_track_name"
         android:layout_marginLeft="20dp"
-        android:layout_gravity="center"
+        android:layout_toRightOf="@id/listitem_track_imageview"
+        android:textStyle="bold"
+        style="@style/TrackListTextview"
         />
-</LinearLayout>
+    <TextView
+        android:id="@+id/listitem_track_album"
+        android:layout_alignLeft="@id/listitem_track_name"
+        android:layout_below="@id/listitem_track_name"
+        style="@style/TrackListTextview"
+        />
+</RelativeLayout>

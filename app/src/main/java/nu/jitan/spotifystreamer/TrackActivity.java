@@ -14,6 +14,7 @@ import nu.jitan.spotifystreamer.model.MyTrackList;
 
 
 public class TrackActivity extends AppCompatActivity {
+    public static String TRACKLIST_KEY = "se.jitan.spotifystreamer.tracklistkey";
     private TrackAdapter mTrackAdapter;
     @InjectView(R.id.listview_track) ListView mTrackList;
 
@@ -27,9 +28,9 @@ public class TrackActivity extends AppCompatActivity {
         mTrackList.setAdapter(mTrackAdapter);
 
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra("tracks")) {
+        if (intent != null && intent.hasExtra(TRACKLIST_KEY)) {
             List<MyTrack> trackList = ((MyTrackList) intent.getParcelableExtra
-                ("tracks")).getMyTrackList();
+                (TRACKLIST_KEY)).getMyTrackList();
             mTrackAdapter.clear();
             mTrackAdapter.addAll(trackList);
         }

@@ -26,29 +26,33 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
         if (convertView != null) {
             mHolder = (ViewHolder) convertView.getTag();
         } else {
-            convertView = mInflater.inflate(R.layout.listitem_search, parent, false);
+            convertView = mInflater.inflate(R.layout.listitem_track, parent, false);
             mHolder = new ViewHolder(convertView);
             convertView.setTag(mHolder);
         }
 
         MyTrack track = getItem(position);
 
-        mHolder.textView.setText(track.getAlbumName() + " - " + track.getTrackName());
+        mHolder.trackName.setText(track.getTrackName());
+        mHolder.albumName.setText(track.getAlbumName());
+
         if (!track.getImgUrl().isEmpty()) {
             Picasso.with(getContext())
                 .load(track.getImgUrl())
                 .resizeDimen(R.dimen.listitem_imageview, R.dimen
                     .listitem_imageview)
                 .centerCrop()
-                .into(mHolder.imageView);
+                .into(mHolder.albumArt);
         }
 
         return convertView;
     }
 
     static class ViewHolder {
-        @InjectView(R.id.listitem_search_imageview) ImageView imageView;
-        @InjectView(R.id.listitem_search_textview) TextView textView;
+        @InjectView(R.id.listitem_track_imageview) ImageView albumArt;
+        @InjectView(R.id.listitem_track_name) TextView trackName;
+        @InjectView(R.id.listitem_track_album) TextView albumName;
+
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);
