@@ -28,7 +28,8 @@ public class TrackActivity extends AppCompatActivity {
         mTrackList.setAdapter(mTrackAdapter);
 
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(TRACKLIST_KEY)) {
+        if (intent != null && intent.hasExtra(TRACKLIST_KEY) && intent.hasExtra(Intent.EXTRA_TEXT)) {
+            getSupportActionBar().setSubtitle(intent.getStringExtra(Intent.EXTRA_TEXT));
             List<MyTrack> trackList = ((MyTrackList) intent.getParcelableExtra
                 (TRACKLIST_KEY)).getMyTrackList();
             mTrackAdapter.clear();

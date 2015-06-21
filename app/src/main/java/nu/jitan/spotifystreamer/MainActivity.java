@@ -79,12 +79,11 @@ public class MainActivity extends AppCompatActivity {
 
     @OnItemClick(R.id.listview_search)
     public void loadArtistTracks(int position) {
-        String artistId = mSearchAdapter.getItem(position).id;
-
+        Artist artist = mSearchAdapter.getItem(position);
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put(SpotifyService.COUNTRY, "SE");
 
-        mSpotifyService.getArtistTopTrack(artistId, queryParams, new Callback<Tracks>() {
+        mSpotifyService.getArtistTopTrack(artist.id, queryParams, new Callback<Tracks>() {
             @Override
             public void success(Tracks tracks, Response response) {
                 Context context = getApplicationContext();
@@ -93,13 +92,12 @@ public class MainActivity extends AppCompatActivity {
                         .LENGTH_SHORT).show();
                 } else {
                     Intent loadTracksIntent = new Intent(context, TrackActivity.class);
-
                     List<MyTrack> myTrackList = new ArrayList<>();
 
                     String albumName, trackName, imgUrl;
                     for (Track track : tracks.tracks) {
-                            albumName = track.album.name;
-                            trackName = track.name;
+                        albumName = track.album.name;
+                        trackName = track.name;
 
                         if (track.album.images.size() > 0) {
                             imgUrl = track.album.images.get(0).url;
@@ -109,7 +107,9 @@ public class MainActivity extends AppCompatActivity {
                         myTrackList.add(MyTrack.create(albumName, trackName, imgUrl));
                     }
 
-                    loadTracksIntent.putExtra(TrackActivity.TRACKLIST_KEY, MyTrackList.create(myTrackList));
+                    loadTracksIntent.putExtra(TrackActivity.TRACKLIST_KEY, MyTrackList.create
+                        (myTrackList));
+                    loadTracksIntent.putExtra(Intent.EXTRA_TEXT, artist.name);
                     startActivity(loadTracksIntent);
                 }
             }
