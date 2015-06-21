@@ -5,8 +5,6 @@ import auto.parcel.AutoParcel;
 
 @AutoParcel
 abstract public class MyTrack implements Parcelable {
-    String albumName, trackName, imgUrl;
-
     public abstract String getAlbumName();
     public abstract String getTrackName();
     public abstract String getImgUrl();

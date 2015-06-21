@@ -11,8 +11,9 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.squareup.picasso.Picasso;
 import kaaes.spotify.webapi.android.models.Artist;
+import nu.jitan.spotifystreamer.model.MyArtist;
 
-public class SearchAdapter extends ArrayAdapter<Artist> {
+public class SearchAdapter extends ArrayAdapter<MyArtist> {
     private ViewHolder mHolder;
     private LayoutInflater mInflater;
 
@@ -31,11 +32,11 @@ public class SearchAdapter extends ArrayAdapter<Artist> {
             convertView.setTag(mHolder);
         }
 
-        Artist artist = getItem(position);
+        MyArtist artist = getItem(position);
 
-        mHolder.textView.setText(artist.name);
-        if (artist.images.size() > 0) {
-            String artistThumbUrl = artist.images.get(0).url;
+        mHolder.textView.setText(artist.getName());
+        if (!artist.getImgUrl().isEmpty()) {
+            String artistThumbUrl = artist.getImgUrl();
             Picasso.with(getContext())
                 .load(artistThumbUrl)
                 .resizeDimen(R.dimen.listitem_imageview, R.dimen

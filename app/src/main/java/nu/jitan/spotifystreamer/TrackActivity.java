@@ -14,7 +14,7 @@ import nu.jitan.spotifystreamer.model.MyTrackList;
 
 
 public class TrackActivity extends AppCompatActivity {
-    public static String TRACKLIST_KEY = "se.jitan.spotifystreamer.tracklistkey";
+    public static String TRACKLIST_KEY = "nu.jitan.spotifystreamer.tracklistkey";
     private TrackAdapter mTrackAdapter;
     @InjectView(R.id.listview_track) ListView mTrackList;
 
