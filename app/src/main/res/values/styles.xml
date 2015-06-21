@@ -11,4 +11,8 @@
         <item name="android:layout_gravity">center</item>
     </style>
 
+    <style name="ListText">
+        <item name="android:textColor">@color/gray_dark</item>
+    </style>
+
 </resources>
