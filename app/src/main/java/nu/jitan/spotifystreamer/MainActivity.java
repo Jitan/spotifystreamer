@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import nu.jitan.spotifystreamer.model.MyArtist;
 import nu.jitan.spotifystreamer.model.MyArtistList;
@@ -30,8 +30,9 @@ import retrofit.client.Response;
 import trikita.log.Log;
 
 public class MainActivity extends AppCompatActivity {
+    private static String ARTIST_LIST_KEY = "nu.jitan.spotifystreamer.artistlistkey";
     private SpotifyService mSpotifyService;
-    private SearchAdapter mSearchAdapter;
+    private ArtistAdapter mArtistAdapter;
     @InjectView(R.id.searchview) SearchView mSearchView;
     @InjectView(R.id.listview_search) ListView mSearchResultList;
 
@@ -41,82 +42,62 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
         mSpotifyService = new SpotifyApi().getService();
-        mSearchAdapter = new SearchAdapter(this);
+        mArtistAdapter = new ArtistAdapter(this);
 
-        mSearchResultList.setAdapter(mSearchAdapter);
+        mSearchResultList.setAdapter(mArtistAdapter);
         setupSearchView();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         List<MyArtist> myArtistList = new ArrayList<>();
-        for (int i = 0; i < mSearchAdapter.getCount(); i++) {
-            myArtistList.add(mSearchAdapter.getItem(i));
+        for (int i = 0; i < mArtistAdapter.getCount(); i++) {
+            myArtistList.add(mArtistAdapter.getItem(i));
         }
-        outState.putParcelable("search", MyArtistList.create(myArtistList));
+        outState.putParcelable(ARTIST_LIST_KEY, MyArtistList.create(myArtistList));
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            List<MyArtist> myArtistList = ((MyArtistList) savedInstanceState.getParcelable
-                ("search")).getMyArtistList();
-            mSearchAdapter.clear();
-            mSearchAdapter.addAll(myArtistList);
-            mSearchResultList.setSelection(0);
-        }
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        List<MyArtist> myArtistList = ((MyArtistList) savedInstanceState.getParcelable
+            (ARTIST_LIST_KEY)).getMyArtistList();
+        mArtistAdapter.clear();
+        mArtistAdapter.addAll(myArtistList);
+        mSearchResultList.setSelection(0);
+
         super.onRestoreInstanceState(savedInstanceState);
     }
 
     private void searchArtist(String searchQuery) {
         mSpotifyService.searchArtists(searchQuery, new Callback<ArtistsPager>() {
 
-                @Override
-                public void success(ArtistsPager artistsPager, Response response) {
-                    final List<Artist> artistList = artistsPager.artists.items;
+            @Override
+            public void success(ArtistsPager artistsPager, Response response) {
 
-
-                    if (artistList.isEmpty()) {
-                        Toast.makeText(getApplicationContext(), getString(R.string
-                            .error_artist_notfound), Toast
-                            .LENGTH_SHORT).show();
-                    } else {
-                        List<MyArtist> myArtistList = new ArrayList<>();
-
-                        String artistId, artistName, imgUrl;
-                        for (Artist artist : artistList) {
-                            artistId = artist.id;
-                            artistName = artist.name;
-
-                            if (artist.images.size() > 0) {
-                                imgUrl = artist.images.get(0).url;
-                            } else {
-                                imgUrl = "";
-                            }
-
-                            myArtistList.add(MyArtist.create(artistId, artistName, imgUrl));
-
-                            runOnUiThread(() -> {
-                                mSearchAdapter.clear();
-                                mSearchAdapter.addAll(myArtistList);
-                                mSearchResultList.setSelection(0);
-                            });
-                        }
-                    }
-                }
-
-                @Override
-                public void failure(RetrofitError error) {
-                    Log.d("RetrofitError when searching Artists: ", error.getMessage());
+                if (artistsPager.artists.total == 0) {
+                    Toast.makeText(getApplicationContext(), getString(R.string
+                        .error_artist_notfound), Toast
+                        .LENGTH_SHORT).show();
+                } else {
+                    runOnUiThread(() -> {
+                        mArtistAdapter.clear();
+                        mArtistAdapter.addAll(Util.extractArtistData(artistsPager));
+                        mSearchResultList.setSelection(0);
+                    });
                 }
             }
-        );
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("RetrofitError when searching Artists: ", error.getMessage());
+            }
+        });
     }
 
     @OnItemClick(R.id.listview_search)
     public void loadArtistTracks(int position) {
-        MyArtist artist = mSearchAdapter.getItem(position);
+        MyArtist artist = mArtistAdapter.getItem(position);
         Intent loadTracksIntent = new Intent(this, TrackActivity.class);
         loadTracksIntent.putExtra(Intent.EXTRA_TEXT, artist.getId());
         startActivity(loadTracksIntent);

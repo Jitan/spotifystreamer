@@ -13,11 +13,11 @@ import com.squareup.picasso.Picasso;
 import kaaes.spotify.webapi.android.models.Artist;
 import nu.jitan.spotifystreamer.model.MyArtist;
 
-public class SearchAdapter extends ArrayAdapter<MyArtist> {
+public class ArtistAdapter extends ArrayAdapter<MyArtist> {
     private ViewHolder mHolder;
     private LayoutInflater mInflater;
 
-    public SearchAdapter(Context context) {
+    public ArtistAdapter(Context context) {
         super(context, 0);
         mInflater = LayoutInflater.from(context);
     }
