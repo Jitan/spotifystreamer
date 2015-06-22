@@ -3,6 +3,7 @@ package nu.jitan.spotifystreamer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,8 +11,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -24,6 +25,8 @@ import trikita.log.Log;
 
 
 public class TrackActivity extends AppCompatActivity {
+    private static String TRACK_LIST_KEY = "nu.jitan.spotifystreamer.tracklistkey";
+    private ArrayList<MyTrack> mLastSearchResults;
     private TrackAdapter mTrackAdapter;
     private SpotifyService mSpotifyService;
 
@@ -41,16 +44,23 @@ public class TrackActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-            if (mTrackAdapter.isEmpty()) {
-                loadTopTracks(intent.getStringExtra(Intent.EXTRA_TEXT));
-            }
+        if (savedInstanceState == null && intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
+            loadTopTracks(intent.getStringExtra(Intent.EXTRA_TEXT));
         }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mLastSearchResults = savedInstanceState.getParcelableArrayList(TRACK_LIST_KEY);
+        mTrackAdapter.clear();
+        mTrackAdapter.addAll(mLastSearchResults);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(TRACK_LIST_KEY, mLastSearchResults);
     }
 
     private void loadTopTracks(String artistId) {
@@ -65,10 +75,11 @@ public class TrackActivity extends AppCompatActivity {
                     Toast.makeText(context, "No tracks found for this artist", Toast
                         .LENGTH_SHORT).show();
                 } else {
-                    List<MyTrack> myTrackList = Util.extractTrackData(tracks);
+                    ArrayList<MyTrack> trackList = Util.extractTrackData(tracks);
                     runOnUiThread(() -> {
                         mTrackAdapter.clear();
-                        mTrackAdapter.addAll(myTrackList);
+                        mTrackAdapter.addAll(trackList);
+                        mLastSearchResults = trackList;
                     });
                 }
             }
@@ -79,8 +90,6 @@ public class TrackActivity extends AppCompatActivity {
             }
         });
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.squareup.picasso.Picasso;
+import java.util.ArrayList;
 import nu.jitan.spotifystreamer.model.MyTrack;
 
 public class TrackAdapter extends ArrayAdapter<MyTrack> {
@@ -47,6 +48,15 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
 
         return convertView;
     }
+
+    public ArrayList<MyTrack> getList() {
+        ArrayList<MyTrack> myTrackList = new ArrayList<>();
+        for (int i = 0; i < getCount(); i++) {
+            myTrackList.add(getItem(i));
+        }
+        return myTrackList;
+    }
+
 
     static class ViewHolder {
         @InjectView(R.id.listitem_track_imageview) ImageView albumArt;

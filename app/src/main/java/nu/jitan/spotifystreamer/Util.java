@@ -20,8 +20,8 @@ public final class Util {
      * @param tracks Original Tracks object from Spotify API Wrapper
      * @return A list with parcelable MyTrack objects
      */
-    public static List<MyTrack> extractTrackData(Tracks tracks) {
-        List<MyTrack> myTrackList = new ArrayList<>();
+    public static ArrayList<MyTrack> extractTrackData(Tracks tracks) {
+        ArrayList<MyTrack> myTrackList = new ArrayList<>();
 
         String albumName, trackName, imgUrl;
         for (Track track : tracks.tracks) {
@@ -45,10 +45,10 @@ public final class Util {
      * @param artistsPager Original ArtistsPager object from Spotify API Wrapper
      * @return A list with parcelable MyArtist objects
      */
-    public static List<MyArtist> extractArtistData(ArtistsPager artistsPager) {
+    public static ArrayList<MyArtist> extractArtistData(ArtistsPager artistsPager) {
         final List<Artist> artistList = artistsPager.artists.items;
 
-        List<MyArtist> myArtistList = new ArrayList<>();
+        ArrayList<MyArtist> myArtistList = new ArrayList<>();
 
         String artistId, artistName, imgUrl;
         for (Artist artist : artistList) {

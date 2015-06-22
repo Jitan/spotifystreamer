@@ -10,7 +10,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.squareup.picasso.Picasso;
-import kaaes.spotify.webapi.android.models.Artist;
+import java.util.ArrayList;
 import nu.jitan.spotifystreamer.model.MyArtist;
 
 public class ArtistAdapter extends ArrayAdapter<MyArtist> {
@@ -46,6 +46,14 @@ public class ArtistAdapter extends ArrayAdapter<MyArtist> {
         }
 
         return convertView;
+    }
+
+    public ArrayList<MyArtist> getList() {
+        ArrayList<MyArtist> myArtistList = new ArrayList<>();
+        for (int i = 0; i < getCount(); i++) {
+            myArtistList.add(getItem(i));
+        }
+        return myArtistList;
     }
 
     static class ViewHolder {

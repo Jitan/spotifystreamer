@@ -17,13 +17,11 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
-import java.util.ArrayList;
 import java.util.List;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import nu.jitan.spotifystreamer.model.MyArtist;
-import nu.jitan.spotifystreamer.model.MyArtistList;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -49,24 +47,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        List<MyArtist> myArtistList = new ArrayList<>();
-        for (int i = 0; i < mArtistAdapter.getCount(); i++) {
-            myArtistList.add(mArtistAdapter.getItem(i));
-        }
-        outState.putParcelable(ARTIST_LIST_KEY, MyArtistList.create(myArtistList));
-        super.onSaveInstanceState(outState);
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
     }
 
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        List<MyArtist> myArtistList = ((MyArtistList) savedInstanceState.getParcelable
-            (ARTIST_LIST_KEY)).getMyArtistList();
-        mArtistAdapter.clear();
-        mArtistAdapter.addAll(myArtistList);
-        mSearchResultList.setSelection(0);
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String searchQuery = intent.getStringExtra(SearchManager.QUERY);
+            searchArtist(searchQuery);
+        }
+    }
 
-        super.onRestoreInstanceState(savedInstanceState);
+    @OnItemClick(R.id.listview_search)
+    public void loadArtistTracks(int position) {
+        MyArtist artist = mArtistAdapter.getItem(position);
+        Intent loadTracksIntent = new Intent(this, TrackActivity.class);
+        loadTracksIntent.putExtra(Intent.EXTRA_TEXT, artist.getId());
+        startActivity(loadTracksIntent);
     }
 
     private void searchArtist(String searchQuery) {
@@ -95,14 +93,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @OnItemClick(R.id.listview_search)
-    public void loadArtistTracks(int position) {
-        MyArtist artist = mArtistAdapter.getItem(position);
-        Intent loadTracksIntent = new Intent(this, TrackActivity.class);
-        loadTracksIntent.putExtra(Intent.EXTRA_TEXT, artist.getId());
-        startActivity(loadTracksIntent);
-    }
-
     private void setupSearchView() {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
@@ -112,24 +102,27 @@ public class MainActivity extends AppCompatActivity {
         removeMagnifierFromSearchView();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(ARTIST_LIST_KEY, mArtistAdapter.getList());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        List<MyArtist> myArtistList = savedInstanceState.getParcelableArrayList(ARTIST_LIST_KEY);
+        mArtistAdapter.clear();
+        mArtistAdapter.addAll(myArtistList);
+        mSearchResultList.setSelection(0);
+    }
+
     private void removeMagnifierFromSearchView() {
         int magId = getResources().getIdentifier("android:id/search_mag_icon", null,
             null);
         ImageView magImage = ButterKnife.findById(mSearchView, magId);
         magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        setIntent(intent);
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String searchQuery = intent.getStringExtra(SearchManager.QUERY);
-            searchArtist(searchQuery);
-        }
     }
 
     @Override
