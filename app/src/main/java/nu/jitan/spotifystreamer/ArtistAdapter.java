@@ -24,17 +24,11 @@ public class ArtistAdapter extends ArrayAdapter<MyArtist> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView != null) {
-            mHolder = (ViewHolder) convertView.getTag();
-        } else {
-            convertView = mInflater.inflate(R.layout.listitem_search, parent, false);
-            mHolder = new ViewHolder(convertView);
-            convertView.setTag(mHolder);
-        }
+        convertView = setupViewHolder(convertView, parent);
 
         MyArtist artist = getItem(position);
-
         mHolder.textView.setText(artist.getName());
+
         if (!artist.getImgUrl().isEmpty()) {
             String artistThumbUrl = artist.getImgUrl();
             Picasso.with(getContext())
@@ -44,7 +38,17 @@ public class ArtistAdapter extends ArrayAdapter<MyArtist> {
                 .centerCrop()
                 .into(mHolder.imageView);
         }
+        return convertView;
+    }
 
+    private View setupViewHolder(View convertView, ViewGroup parent) {
+        if (convertView != null) {
+            mHolder = (ViewHolder) convertView.getTag();
+        } else {
+            convertView = mInflater.inflate(R.layout.listitem_search, parent, false);
+            mHolder = new ViewHolder(convertView);
+            convertView.setTag(mHolder);
+        }
         return convertView;
     }
 

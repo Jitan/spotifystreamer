@@ -8,13 +8,10 @@ import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import nu.jitan.spotifystreamer.model.MyArtist;
 import nu.jitan.spotifystreamer.model.MyTrack;
-import trikita.log.Log;
 
 public final class Util {
     private Util() {
     }
-
-//    public static int getThumbIndex(Json)
 
     /**
      * Extracts the data we need from Spotify API Wrapper object and stores it in our own parcelable
@@ -56,15 +53,14 @@ public final class Util {
     public static ArrayList<MyArtist> extractArtistData(ArtistsPager artistsPager) {
         final List<Artist> artistList = artistsPager.artists.items;
         final ArrayList<MyArtist> myArtistList = new ArrayList<>();
-
         String artistId, artistName, imgUrl;
+
         for (Artist artist : artistList) {
             artistId = artist.id;
             artistName = artist.name;
 
             // Get second last img in array which should always be approx 200-300px wide
             if (artist.images.size() > 0) {
-                Log.d("ARTIST IMAGE WIDTH: ", artist.images.get(artist.images.size() - 2).width);
                 imgUrl = artist.images.get(artist.images.size() - 2).url;
             } else {
                 imgUrl = "";

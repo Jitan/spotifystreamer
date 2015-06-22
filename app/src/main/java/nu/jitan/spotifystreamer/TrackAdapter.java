@@ -23,16 +23,9 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView != null) {
-            mHolder = (ViewHolder) convertView.getTag();
-        } else {
-            convertView = mInflater.inflate(R.layout.listitem_track, parent, false);
-            mHolder = new ViewHolder(convertView);
-            convertView.setTag(mHolder);
-        }
+        convertView = setupViewHolder(convertView, parent);
 
         MyTrack track = getItem(position);
-
         mHolder.trackName.setText(track.getTrackName());
         mHolder.albumName.setText(track.getAlbumName());
 
@@ -44,16 +37,24 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
                 .centerCrop()
                 .into(mHolder.albumArt);
         }
-
         return convertView;
     }
 
+    private View setupViewHolder(View convertView, ViewGroup parent) {
+        if (convertView != null) {
+            mHolder = (ViewHolder) convertView.getTag();
+        } else {
+            convertView = mInflater.inflate(R.layout.listitem_track, parent, false);
+            mHolder = new ViewHolder(convertView);
+            convertView.setTag(mHolder);
+        }
+        return convertView;
+    }
 
     static class ViewHolder {
         @InjectView(R.id.listitem_track_imageview) ImageView albumArt;
         @InjectView(R.id.listitem_track_name) TextView trackName;
         @InjectView(R.id.listitem_track_album) TextView albumName;
-
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);
