@@ -6,4 +6,7 @@
     <string name="title_activity_track">Top 10 Tracks</string>
     <string name="album_thumbnail">Album Thumbnail</string>
     <string name="error.artist.notfound">No artist found, please refine your search</string>
+    <string name="error.artist.network">Could not load search results - Check network connection</string>
+    <string name="error.tracks.network">Could not load tracks - Check network connection</string>
+    <string name="error.tracks.notfound">No tracks found for this artist</string>
 </resources>

@@ -38,10 +38,11 @@ public final class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
+
         mSpotifyService = new SpotifyApi().getService();
         mArtistAdapter = new ArtistAdapter(this);
-
         mSearchResultList.setAdapter(mArtistAdapter);
+
         setupSearchView();
     }
 
@@ -62,7 +63,8 @@ public final class MainActivity extends AppCompatActivity {
     public void loadArtistTracks(int position) {
         MyArtist artist = mArtistAdapter.getItem(position);
         Intent loadTracksIntent = new Intent(this, TrackActivity.class);
-        loadTracksIntent.putExtra(Intent.EXTRA_TEXT, artist.getId());
+        loadTracksIntent.putExtra(TrackActivity.ARTIST_ID_KEY, artist.getId());
+        loadTracksIntent.putExtra(TrackActivity.ARTIST_NAME_KEY, artist.getName());
         startActivity(loadTracksIntent);
     }
 
@@ -71,7 +73,6 @@ public final class MainActivity extends AppCompatActivity {
 
             @Override
             public void success(ArtistsPager artistsPager, Response response) {
-
                 if (artistsPager.artists.total == 0) {
                     Toast.makeText(getApplicationContext(), getString(R.string
                         .error_artist_notfound), Toast
@@ -87,8 +88,8 @@ public final class MainActivity extends AppCompatActivity {
 
             @Override
             public void failure(RetrofitError error) {
-                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Could not load " +
-                    "search results - Check network connection", Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> Toast.makeText(getApplicationContext(), getString(R.string
+                    .error_artist_network), Toast.LENGTH_LONG).show());
             }
         });
     }

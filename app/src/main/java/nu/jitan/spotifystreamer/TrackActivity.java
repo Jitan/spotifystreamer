@@ -24,6 +24,8 @@ import retrofit.client.Response;
 
 
 public final class TrackActivity extends AppCompatActivity {
+    public static final String ARTIST_NAME_KEY = "nu.jitan.spotifystreamer.artistnamekey";
+    public static final String ARTIST_ID_KEY = "nu.jitan.spotifystreamer.artistidkey";
     private static final String TRACK_LIST_KEY = "nu.jitan.spotifystreamer.tracklistkey";
     private static final String STATE_KEY = "nu.jitan.spotifystreamer.statekey";
     private ArrayList<MyTrack> mLastSearchResults;
@@ -43,15 +45,18 @@ public final class TrackActivity extends AppCompatActivity {
         mTrackList.setAdapter(mTrackAdapter);
 
         Intent intent = getIntent();
-
-        if (savedInstanceState == null && intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-            loadTopTracks(intent.getStringExtra(Intent.EXTRA_TEXT));
+        if (savedInstanceState == null && intent != null && intent.hasExtra(ARTIST_NAME_KEY) &&
+            intent.hasExtra(ARTIST_ID_KEY))
+        {
+            getSupportActionBar().setSubtitle(intent.getStringExtra(ARTIST_NAME_KEY));
+            loadTopTracks(intent.getStringExtra(ARTIST_ID_KEY));
         }
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        getSupportActionBar().setSubtitle(savedInstanceState.getString(ARTIST_NAME_KEY));
         mLastSearchResults = savedInstanceState.getParcelableArrayList(TRACK_LIST_KEY);
         mTrackAdapter.addAll(mLastSearchResults);
         mTrackList.onRestoreInstanceState(savedInstanceState.getParcelable(STATE_KEY));
@@ -60,6 +65,7 @@ public final class TrackActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putString(ARTIST_NAME_KEY, getSupportActionBar().getSubtitle().toString());
         outState.putParcelable(STATE_KEY, mTrackList.onSaveInstanceState());
         outState.putParcelableArrayList(TRACK_LIST_KEY, mLastSearchResults);
     }
@@ -73,8 +79,9 @@ public final class TrackActivity extends AppCompatActivity {
             public void success(Tracks tracks, Response response) {
                 Context context = getApplicationContext();
                 if (tracks.tracks.isEmpty()) {
-                    Toast.makeText(context, "No tracks found for this artist", Toast
-                        .LENGTH_SHORT).show();
+                    runOnUiThread(() -> Toast.makeText(context, getString(R.string
+                        .error_tracks_notfound), Toast
+                        .LENGTH_SHORT).show());
                 } else {
                     ArrayList<MyTrack> trackList = Util.extractTrackData(tracks);
                     runOnUiThread(() -> {
@@ -87,8 +94,8 @@ public final class TrackActivity extends AppCompatActivity {
 
             @Override
             public void failure(RetrofitError error) {
-                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Could not load " +
-                    "tracks - Check network connection", Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> Toast.makeText(getApplicationContext(), getString(R.string
+                    .error_tracks_network), Toast.LENGTH_LONG).show());
             }
         });
     }
@@ -111,7 +118,6 @@ public final class TrackActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }
