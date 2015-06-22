@@ -46,8 +46,7 @@ public final class TrackActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (savedInstanceState == null && intent != null && intent.hasExtra(ARTIST_NAME_KEY) &&
-            intent.hasExtra(ARTIST_ID_KEY))
-        {
+            intent.hasExtra(ARTIST_ID_KEY)) {
             getSupportActionBar().setSubtitle(intent.getStringExtra(ARTIST_NAME_KEY));
             loadTopTracks(intent.getStringExtra(ARTIST_ID_KEY));
         }

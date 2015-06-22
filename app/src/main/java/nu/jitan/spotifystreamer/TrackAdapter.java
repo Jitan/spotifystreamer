@@ -10,7 +10,6 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.squareup.picasso.Picasso;
-import java.util.ArrayList;
 import nu.jitan.spotifystreamer.model.MyTrack;
 
 public class TrackAdapter extends ArrayAdapter<MyTrack> {
@@ -37,9 +36,9 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
         mHolder.trackName.setText(track.getTrackName());
         mHolder.albumName.setText(track.getAlbumName());
 
-        if (!track.getImgUrl().isEmpty()) {
+        if (!track.getThumbImgUrl().isEmpty()) {
             Picasso.with(getContext())
-                .load(track.getImgUrl())
+                .load(track.getThumbImgUrl())
                 .resizeDimen(R.dimen.listitem_imageview, R.dimen
                     .listitem_imageview)
                 .centerCrop()
@@ -47,14 +46,6 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
         }
 
         return convertView;
-    }
-
-    public ArrayList<MyTrack> getList() {
-        ArrayList<MyTrack> myTrackList = new ArrayList<>();
-        for (int i = 0; i < getCount(); i++) {
-            myTrackList.add(getItem(i));
-        }
-        return myTrackList;
     }
 
 

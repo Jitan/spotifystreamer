@@ -7,9 +7,12 @@ import auto.parcel.AutoParcel;
 abstract public class MyTrack implements Parcelable {
     public abstract String getAlbumName();
     public abstract String getTrackName();
-    public abstract String getImgUrl();
+    public abstract String getThumbImgUrl();
+    public abstract String getLargeImgUrl();
+    public abstract String getPreviewUrl();
 
-    public static MyTrack create(String albumName, String trackName, String imgUrl) {
-        return new AutoParcel_MyTrack(albumName, trackName, imgUrl);
+    public static MyTrack create(String albumName, String trackName, String thumbImgUrl, String
+        largeImgUrl, String previewUrl) {
+        return new AutoParcel_MyTrack(albumName, trackName, thumbImgUrl, largeImgUrl, previewUrl);
     }
 }

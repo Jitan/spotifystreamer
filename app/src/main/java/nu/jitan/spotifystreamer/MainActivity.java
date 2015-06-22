@@ -74,9 +74,11 @@ public final class MainActivity extends AppCompatActivity {
             @Override
             public void success(ArtistsPager artistsPager, Response response) {
                 if (artistsPager.artists.total == 0) {
-                    Toast.makeText(getApplicationContext(), getString(R.string
-                        .error_artist_notfound), Toast
-                        .LENGTH_SHORT).show();
+                    runOnUiThread(() -> {
+                        Toast.makeText(getApplicationContext(), getString(R.string
+                            .error_artist_notfound), Toast
+                            .LENGTH_SHORT).show();
+                    });
                 } else {
                     runOnUiThread(() -> {
                         mArtistAdapter.clear();
