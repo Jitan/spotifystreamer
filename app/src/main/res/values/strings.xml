@@ -5,4 +5,5 @@
     <string name="artist_thumbnail">Artist thumbnail</string>
     <string name="title_activity_track">Top 10 Tracks</string>
     <string name="album_thumbnail">Album Thumbnail</string>
+    <string name="error.artist.notfound">No artist found, please refine your search</string>
 </resources>

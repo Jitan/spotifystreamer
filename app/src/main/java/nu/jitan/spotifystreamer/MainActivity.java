@@ -17,19 +17,13 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import kaaes.spotify.webapi.android.models.Track;
-import kaaes.spotify.webapi.android.models.Tracks;
 import nu.jitan.spotifystreamer.model.MyArtist;
 import nu.jitan.spotifystreamer.model.MyArtistList;
-import nu.jitan.spotifystreamer.model.MyTrack;
-import nu.jitan.spotifystreamer.model.MyTrackList;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -82,32 +76,34 @@ public class MainActivity extends AppCompatActivity {
                 public void success(ArtistsPager artistsPager, Response response) {
                     final List<Artist> artistList = artistsPager.artists.items;
 
-                    runOnUiThread(() -> {
-                            if (artistList.isEmpty()) {
-                                Toast.makeText(getApplicationContext(), "No artist found", Toast
-                                    .LENGTH_SHORT).show();
+
+                    if (artistList.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), getString(R.string
+                            .error_artist_notfound), Toast
+                            .LENGTH_SHORT).show();
+                    } else {
+                        List<MyArtist> myArtistList = new ArrayList<>();
+
+                        String artistId, artistName, imgUrl;
+                        for (Artist artist : artistList) {
+                            artistId = artist.id;
+                            artistName = artist.name;
+
+                            if (artist.images.size() > 0) {
+                                imgUrl = artist.images.get(0).url;
                             } else {
-                                List<MyArtist> myArtistList = new ArrayList<>();
-
-                                String artistId, artistName, imgUrl;
-                                for (Artist artist : artistList) {
-                                    artistId = artist.id;
-                                    artistName = artist.name;
-
-                                    if (artist.images.size() > 0) {
-                                        imgUrl = artist.images.get(0).url;
-                                    } else {
-                                        imgUrl = "";
-                                    }
-
-                                    myArtistList.add(MyArtist.create(artistId, artistName, imgUrl));
-                                    mSearchAdapter.clear();
-                                    mSearchAdapter.addAll(myArtistList);
-                                    mSearchResultList.setSelection(0);
-                                }
+                                imgUrl = "";
                             }
+
+                            myArtistList.add(MyArtist.create(artistId, artistName, imgUrl));
+
+                            runOnUiThread(() -> {
+                                mSearchAdapter.clear();
+                                mSearchAdapter.addAll(myArtistList);
+                                mSearchResultList.setSelection(0);
+                            });
                         }
-                    );
+                    }
                 }
 
                 @Override
@@ -115,53 +111,15 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("RetrofitError when searching Artists: ", error.getMessage());
                 }
             }
-
         );
     }
 
     @OnItemClick(R.id.listview_search)
     public void loadArtistTracks(int position) {
         MyArtist artist = mSearchAdapter.getItem(position);
-        Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put(SpotifyService.COUNTRY, "SE");
-
-        mSpotifyService.getArtistTopTrack(artist.getId(), queryParams, new Callback<Tracks>() {
-            @Override
-            public void success(Tracks tracks, Response response) {
-                Context context = getApplicationContext();
-                if (tracks.tracks.isEmpty()) {
-                    Toast.makeText(context, "No tracks found for this artist", Toast
-                        .LENGTH_SHORT).show();
-                } else {
-                    Intent loadTracksIntent = new Intent(context, TrackActivity.class);
-                    List<MyTrack> myTrackList = new ArrayList<>();
-
-                    String albumName, trackName, imgUrl;
-                    for (Track track : tracks.tracks) {
-                        albumName = track.album.name;
-                        trackName = track.name;
-
-                        if (track.album.images.size() > 0) {
-                            imgUrl = track.album.images.get(0).url;
-                        } else {
-                            imgUrl = "";
-                        }
-                        myTrackList.add(MyTrack.create(albumName, trackName, imgUrl));
-                    }
-
-                    loadTracksIntent.putExtra(TrackActivity.TRACKLIST_KEY, MyTrackList.create
-                        (myTrackList));
-                    loadTracksIntent.putExtra(Intent.EXTRA_TEXT, artist.getName());
-                    startActivity(loadTracksIntent);
-                }
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d("RetrofitError when loading Artist Tracks: ", error.getMessage());
-            }
-        });
-
+        Intent loadTracksIntent = new Intent(this, TrackActivity.class);
+        loadTracksIntent.putExtra(Intent.EXTRA_TEXT, artist.getId());
+        startActivity(loadTracksIntent);
     }
 
     private void setupSearchView() {
