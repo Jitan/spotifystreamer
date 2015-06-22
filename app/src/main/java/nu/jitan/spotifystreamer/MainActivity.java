@@ -17,7 +17,6 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
-import java.util.List;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
@@ -27,8 +26,9 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import trikita.log.Log;
 
-public class MainActivity extends AppCompatActivity {
-    private static String ARTIST_LIST_KEY = "nu.jitan.spotifystreamer.artistlistkey";
+public final class MainActivity extends AppCompatActivity {
+    private static final String STATE_KEY = "nu.jitan.spotifystreamer.statekey";
+    private static final String ARTIST_LIST_KEY = "nu.jitan.spotifystreamer.artistlistkey";
     private SpotifyService mSpotifyService;
     private ArtistAdapter mArtistAdapter;
     @InjectView(R.id.searchview) SearchView mSearchView;
@@ -106,16 +106,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(ARTIST_LIST_KEY, mArtistAdapter.getList());
+        outState.putParcelable(STATE_KEY, mSearchResultList.onSaveInstanceState());
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        List<MyArtist> myArtistList = savedInstanceState.getParcelableArrayList(ARTIST_LIST_KEY);
         mArtistAdapter.clear();
-        mArtistAdapter.addAll(myArtistList);
-        mSearchResultList.setSelection(0);
+        mArtistAdapter.addAll(savedInstanceState.getParcelableArrayList(ARTIST_LIST_KEY));
+        mSearchResultList.onRestoreInstanceState(savedInstanceState.getParcelable(STATE_KEY));
     }
 
     private void removeMagnifierFromSearchView() {

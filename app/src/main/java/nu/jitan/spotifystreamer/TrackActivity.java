@@ -24,8 +24,9 @@ import retrofit.client.Response;
 import trikita.log.Log;
 
 
-public class TrackActivity extends AppCompatActivity {
-    private static String TRACK_LIST_KEY = "nu.jitan.spotifystreamer.tracklistkey";
+public final class TrackActivity extends AppCompatActivity {
+    private static final String TRACK_LIST_KEY = "nu.jitan.spotifystreamer.tracklistkey";
+    private static final String STATE_KEY = "nu.jitan.spotifystreamer.statekey";
     private ArrayList<MyTrack> mLastSearchResults;
     private TrackAdapter mTrackAdapter;
     private SpotifyService mSpotifyService;
@@ -55,11 +56,13 @@ public class TrackActivity extends AppCompatActivity {
         mLastSearchResults = savedInstanceState.getParcelableArrayList(TRACK_LIST_KEY);
         mTrackAdapter.clear();
         mTrackAdapter.addAll(mLastSearchResults);
+        mTrackList.onRestoreInstanceState(savedInstanceState.getParcelable(STATE_KEY));
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putParcelable(STATE_KEY, mTrackList.onSaveInstanceState());
         outState.putParcelableArrayList(TRACK_LIST_KEY, mLastSearchResults);
     }
 
