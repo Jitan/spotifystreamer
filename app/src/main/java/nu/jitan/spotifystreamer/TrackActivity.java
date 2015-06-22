@@ -21,7 +21,6 @@ import nu.jitan.spotifystreamer.model.MyTrack;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import trikita.log.Log;
 
 
 public final class TrackActivity extends AppCompatActivity {
@@ -54,7 +53,6 @@ public final class TrackActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mLastSearchResults = savedInstanceState.getParcelableArrayList(TRACK_LIST_KEY);
-        mTrackAdapter.clear();
         mTrackAdapter.addAll(mLastSearchResults);
         mTrackList.onRestoreInstanceState(savedInstanceState.getParcelable(STATE_KEY));
     }
@@ -89,7 +87,8 @@ public final class TrackActivity extends AppCompatActivity {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d("RetrofitError when loading Artist Tracks: ", error.getMessage());
+                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Could not load " +
+                    "tracks - Check network connection", Toast.LENGTH_LONG).show());
             }
         });
     }

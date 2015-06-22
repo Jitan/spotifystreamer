@@ -24,7 +24,6 @@ import nu.jitan.spotifystreamer.model.MyArtist;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import trikita.log.Log;
 
 public final class MainActivity extends AppCompatActivity {
     private static final String STATE_KEY = "nu.jitan.spotifystreamer.statekey";
@@ -88,7 +87,8 @@ public final class MainActivity extends AppCompatActivity {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d("RetrofitError when searching Artists: ", error.getMessage());
+                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Could not load " +
+                    "search results - Check network connection", Toast.LENGTH_LONG).show());
             }
         });
     }
@@ -112,8 +112,6 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-        mArtistAdapter.clear();
         mArtistAdapter.addAll(savedInstanceState.getParcelableArrayList(ARTIST_LIST_KEY));
         mSearchResultList.onRestoreInstanceState(savedInstanceState.getParcelable(STATE_KEY));
     }
