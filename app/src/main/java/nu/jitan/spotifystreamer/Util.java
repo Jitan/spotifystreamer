@@ -15,6 +15,33 @@ public final class Util {
 
     /**
      * Extracts the data we need from Spotify API Wrapper object and stores it in our own parcelable
+     * MyArtist object.
+     *
+     * @param artistsPager Original ArtistsPager object from Spotify API Wrapper
+     * @return A list with parcelable MyArtist objects
+     */
+    public static ArrayList<MyArtist> extractArtistData(ArtistsPager artistsPager) {
+        final List<Artist> artistList = artistsPager.artists.items;
+        final ArrayList<MyArtist> myArtistList = new ArrayList<>();
+        String artistId, artistName, imgUrl;
+
+        for (Artist artist : artistList) {
+            artistId = artist.id;
+            artistName = artist.name;
+
+            // Get second last img in array which should always be approx 200-300px wide
+            if (artist.images.size() > 0) {
+                imgUrl = artist.images.get(artist.images.size() - 2).url;
+            } else {
+                imgUrl = "";
+            }
+            myArtistList.add(MyArtist.create(artistId, artistName, imgUrl));
+        }
+        return myArtistList;
+    }
+
+    /**
+     * Extracts the data we need from Spotify API Wrapper object and stores it in our own parcelable
      * MyTrack object.
      *
      * @param tracks Original Tracks object from Spotify API Wrapper
@@ -41,32 +68,5 @@ public final class Util {
                 previewUrl));
         }
         return myTrackList;
-    }
-
-    /**
-     * Extracts the data we need from Spotify API Wrapper object and stores it in our own parcelable
-     * MyArtist object.
-     *
-     * @param artistsPager Original ArtistsPager object from Spotify API Wrapper
-     * @return A list with parcelable MyArtist objects
-     */
-    public static ArrayList<MyArtist> extractArtistData(ArtistsPager artistsPager) {
-        final List<Artist> artistList = artistsPager.artists.items;
-        final ArrayList<MyArtist> myArtistList = new ArrayList<>();
-        String artistId, artistName, imgUrl;
-
-        for (Artist artist : artistList) {
-            artistId = artist.id;
-            artistName = artist.name;
-
-            // Get second last img in array which should always be approx 200-300px wide
-            if (artist.images.size() > 0) {
-                imgUrl = artist.images.get(artist.images.size() - 2).url;
-            } else {
-                imgUrl = "";
-            }
-            myArtistList.add(MyArtist.create(artistId, artistName, imgUrl));
-        }
-        return myArtistList;
     }
 }

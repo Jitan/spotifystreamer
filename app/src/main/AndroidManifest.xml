@@ -29,7 +29,7 @@
                 />
         </activity>
         <activity
-            android:name=".TrackActivity"
+            android:name=".ui.track.TrackActivity"
             android:label="@string/title_activity_track"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity"

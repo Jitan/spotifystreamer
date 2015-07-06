@@ -1,9 +1,10 @@
-package nu.jitan.spotifystreamer;
+package nu.jitan.spotifystreamer.ui.artist;
 
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +20,16 @@ import butterknife.OnItemClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import nu.jitan.spotifystreamer.R;
+import nu.jitan.spotifystreamer.Util;
 import nu.jitan.spotifystreamer.model.MyArtist;
+import nu.jitan.spotifystreamer.ui.track.TrackActivity;
+import nu.jitan.spotifystreamer.ui.track.TrackFragment;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class MainFragment extends android.support.v4.app.Fragment {
+public class ArtistFragment extends Fragment {
     private static final String STATE_KEY = "nu.jitan.spotifystreamer.statekey";
     private static final String ARTIST_LIST_KEY = "nu.jitan.spotifystreamer.artistlistkey";
     private SpotifyService mSpotifyService;
@@ -33,20 +38,25 @@ public class MainFragment extends android.support.v4.app.Fragment {
     @InjectView(R.id.listview_search) ListView mSearchResultList;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mSpotifyService = new SpotifyApi().getService();
+        mArtistAdapter = new ArtistAdapter(getActivity());
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
         savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.inject(this, view);
 
-        mSpotifyService = new SpotifyApi().getService();
-        mArtistAdapter = new ArtistAdapter(getActivity());
         mSearchResultList.setAdapter(mArtistAdapter);
-
         setupSearchView();
+
         return view;
     }
 
-    protected void handleIntent(Intent intent) {
+    public void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String searchQuery = intent.getStringExtra(SearchManager.QUERY);
             searchArtist(searchQuery);
@@ -57,8 +67,8 @@ public class MainFragment extends android.support.v4.app.Fragment {
     public void loadArtistTracks(int position) {
         MyArtist artist = mArtistAdapter.getItem(position);
         Intent loadTracksIntent = new Intent(getActivity(), TrackActivity.class);
-        loadTracksIntent.putExtra(TrackActivity.ARTIST_ID_KEY, artist.getId());
-        loadTracksIntent.putExtra(TrackActivity.ARTIST_NAME_KEY, artist.getName());
+        loadTracksIntent.putExtra(TrackFragment.ARTIST_ID_KEY, artist.getId());
+        loadTracksIntent.putExtra(TrackFragment.ARTIST_NAME_KEY, artist.getName());
         startActivity(loadTracksIntent);
     }
 

@@ -1,4 +1,4 @@
-package nu.jitan.spotifystreamer;
+package nu.jitan.spotifystreamer.ui.artist;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,13 +10,15 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.squareup.picasso.Picasso;
-import nu.jitan.spotifystreamer.model.MyTrack;
+import java.util.ArrayList;
+import nu.jitan.spotifystreamer.R;
+import nu.jitan.spotifystreamer.model.MyArtist;
 
-public class TrackAdapter extends ArrayAdapter<MyTrack> {
+public class ArtistAdapter extends ArrayAdapter<MyArtist> {
     private ViewHolder mHolder;
     private LayoutInflater mInflater;
 
-    public TrackAdapter(Context context) {
+    public ArtistAdapter(Context context) {
         super(context, 0);
         mInflater = LayoutInflater.from(context);
     }
@@ -25,17 +27,17 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
     public View getView(int position, View convertView, ViewGroup parent) {
         convertView = setupViewHolder(convertView, parent);
 
-        MyTrack track = getItem(position);
-        mHolder.trackName.setText(track.getTrackName());
-        mHolder.albumName.setText(track.getAlbumName());
+        MyArtist artist = getItem(position);
+        mHolder.textView.setText(artist.getName());
 
-        if (!track.getThumbImgUrl().isEmpty()) {
+        if (!artist.getImgUrl().isEmpty()) {
+            String artistThumbUrl = artist.getImgUrl();
             Picasso.with(getContext())
-                .load(track.getThumbImgUrl())
+                .load(artistThumbUrl)
                 .resizeDimen(R.dimen.listitem_imageview, R.dimen
                     .listitem_imageview)
                 .centerCrop()
-                .into(mHolder.albumArt);
+                .into(mHolder.imageView);
         }
         return convertView;
     }
@@ -44,17 +46,24 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
         if (convertView != null) {
             mHolder = (ViewHolder) convertView.getTag();
         } else {
-            convertView = mInflater.inflate(R.layout.listitem_track, parent, false);
+            convertView = mInflater.inflate(R.layout.listitem_search, parent, false);
             mHolder = new ViewHolder(convertView);
             convertView.setTag(mHolder);
         }
         return convertView;
     }
 
+    public ArrayList<MyArtist> getList() {
+        ArrayList<MyArtist> myArtistList = new ArrayList<>();
+        for (int i = 0; i < getCount(); i++) {
+            myArtistList.add(getItem(i));
+        }
+        return myArtistList;
+    }
+
     static class ViewHolder {
-        @InjectView(R.id.listitem_track_imageview) ImageView albumArt;
-        @InjectView(R.id.listitem_track_name) TextView trackName;
-        @InjectView(R.id.listitem_track_album) TextView albumName;
+        @InjectView(R.id.listitem_search_imageview) ImageView imageView;
+        @InjectView(R.id.listitem_search_textview) TextView textView;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);
