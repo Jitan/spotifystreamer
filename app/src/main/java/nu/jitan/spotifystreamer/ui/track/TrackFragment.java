@@ -1,7 +1,7 @@
 package nu.jitan.spotifystreamer.ui.track;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -18,8 +18,10 @@ import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Tracks;
+import nu.jitan.spotifystreamer.MainActivity;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
+import nu.jitan.spotifystreamer.model.MyArtist;
 import nu.jitan.spotifystreamer.model.MyTrack;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -27,10 +29,10 @@ import retrofit.client.Response;
 
 public class TrackFragment extends Fragment {
     public static final String ARTIST_NAME_KEY = "nu.jitan.spotifystreamer.artistnamekey";
-    public static final String ARTIST_ID_KEY = "nu.jitan.spotifystreamer.artistidkey";
     private static final String TRACK_LIST_KEY = "nu.jitan.spotifystreamer.tracklistkey";
     private static final String STATE_KEY = "nu.jitan.spotifystreamer.statekey";
-    private String mArtistName;
+    public static final String ARTIST_KEY = "nu.jitan.spotifystreamer.artistkey";
+    private MyArtist mArtist;
     private ArrayList<MyTrack> mLastSearchResults;
     private TrackAdapter mTrackAdapter;
     private SpotifyService mSpotifyService;
@@ -42,6 +44,10 @@ public class TrackFragment extends Fragment {
         mSpotifyService = new SpotifyApi().getService();
         mTrackAdapter = new TrackAdapter(getActivity());
 
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mArtist = arguments.getParcelable(ARTIST_KEY);
+        }
     }
 
     @Override
@@ -49,17 +55,18 @@ public class TrackFragment extends Fragment {
         savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_track, container, false);
         ButterKnife.inject(this, view);
-
         mTrackList.setAdapter(mTrackAdapter);
 
-        Intent intent = getActivity().getIntent();
-        if (savedInstanceState == null && intent != null && intent.hasExtra(ARTIST_NAME_KEY) &&
-            intent.hasExtra(ARTIST_ID_KEY)) {
-            mArtistName = intent.getStringExtra(ARTIST_NAME_KEY);
-            setActionBarSubtitle(mArtistName);
-            loadTopTracks(intent.getStringExtra(ARTIST_ID_KEY));
-        }
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        if (mArtist != null) {
+            loadTopTracks(mArtist.getId());
+            setActionBarSubtitle(mArtist.getName());
+        }
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -74,11 +81,14 @@ public class TrackFragment extends Fragment {
     }
 
     private void setActionBarSubtitle(String artistName) {
+        ActionBar actionbar = null;
         if (getActivity() instanceof TrackActivity) {
-            ActionBar actionbar = ((TrackActivity) getActivity()).getSupportActionBar();
-            if (actionbar != null) {
-                actionbar.setSubtitle(artistName);
-            }
+            actionbar = ((TrackActivity) getActivity()).getSupportActionBar();
+        } else if (getActivity() instanceof MainActivity) {
+            actionbar = ((MainActivity) getActivity()).getSupportActionBar();
+        }
+        if (actionbar != null) {
+            actionbar.setSubtitle(artistName);
         }
     }
 
@@ -86,12 +96,12 @@ public class TrackFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(ARTIST_NAME_KEY, mArtistName);
+        outState.putString(ARTIST_NAME_KEY, mArtist.getName());
         outState.putParcelable(STATE_KEY, mTrackList.onSaveInstanceState());
         outState.putParcelableArrayList(TRACK_LIST_KEY, mLastSearchResults);
     }
 
-    private void loadTopTracks(String artistId) {
+    private void loadTopTracks(@NonNull String artistId) {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put(SpotifyService.COUNTRY, "SE");
 
@@ -119,5 +129,6 @@ public class TrackFragment extends Fragment {
                     .error_tracks_network), Toast.LENGTH_LONG).show());
             }
         });
+
     }
 }

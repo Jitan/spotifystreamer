@@ -1,4 +1,4 @@
-package nu.jitan.spotifystreamer.ui.artist;
+package nu.jitan.spotifystreamer.ui.search;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -17,23 +17,23 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
+import de.greenrobot.event.EventBus;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
+import nu.jitan.spotifystreamer.event.ArtistClickedEvent;
 import nu.jitan.spotifystreamer.model.MyArtist;
-import nu.jitan.spotifystreamer.ui.track.TrackActivity;
-import nu.jitan.spotifystreamer.ui.track.TrackFragment;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class ArtistFragment extends Fragment {
+public class SearchFragment extends Fragment {
     private static final String STATE_KEY = "nu.jitan.spotifystreamer.statekey";
     private static final String ARTIST_LIST_KEY = "nu.jitan.spotifystreamer.artistlistkey";
     private SpotifyService mSpotifyService;
-    private ArtistAdapter mArtistAdapter;
+    private SearchAdapter mSearchAdapter;
     @InjectView(R.id.searchview) SearchView mSearchView;
     @InjectView(R.id.listview_search) ListView mSearchResultList;
 
@@ -41,16 +41,16 @@ public class ArtistFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSpotifyService = new SpotifyApi().getService();
-        mArtistAdapter = new ArtistAdapter(getActivity());
+        mSearchAdapter = new SearchAdapter(getActivity());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
         savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_search, container, false);
         ButterKnife.inject(this, view);
 
-        mSearchResultList.setAdapter(mArtistAdapter);
+        mSearchResultList.setAdapter(mSearchAdapter);
         setupSearchView();
 
         return view;
@@ -65,11 +65,8 @@ public class ArtistFragment extends Fragment {
 
     @OnItemClick(R.id.listview_search)
     public void loadArtistTracks(int position) {
-        MyArtist artist = mArtistAdapter.getItem(position);
-        Intent loadTracksIntent = new Intent(getActivity(), TrackActivity.class);
-        loadTracksIntent.putExtra(TrackFragment.ARTIST_ID_KEY, artist.getId());
-        loadTracksIntent.putExtra(TrackFragment.ARTIST_NAME_KEY, artist.getName());
-        startActivity(loadTracksIntent);
+        MyArtist artist = mSearchAdapter.getItem(position);
+        EventBus.getDefault().post(new ArtistClickedEvent(artist));
     }
 
     private void searchArtist(String searchQuery) {
@@ -79,14 +76,14 @@ public class ArtistFragment extends Fragment {
             public void success(ArtistsPager artistsPager, Response response) {
                 if (artistsPager.artists.total == 0) {
                     getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getActivity(), getString(R.string
-                            .error_artist_notfound), Toast
-                            .LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(),
+                            getString(R.string.error_artist_notfound),
+                            Toast.LENGTH_SHORT).show();
                     });
                 } else {
                     getActivity().runOnUiThread(() -> {
-                        mArtistAdapter.clear();
-                        mArtistAdapter.addAll(Util.extractArtistData(artistsPager));
+                        mSearchAdapter.clear();
+                        mSearchAdapter.addAll(Util.extractArtistData(artistsPager));
                         mSearchResultList.setSelection(0);
                     });
                 }
@@ -114,7 +111,7 @@ public class ArtistFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(ARTIST_LIST_KEY, mArtistAdapter.getList());
+        outState.putParcelableArrayList(ARTIST_LIST_KEY, mSearchAdapter.getList());
         outState.putParcelable(STATE_KEY, mSearchResultList.onSaveInstanceState());
     }
 
@@ -122,7 +119,7 @@ public class ArtistFragment extends Fragment {
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            mArtistAdapter.addAll(savedInstanceState.getParcelableArrayList(ARTIST_LIST_KEY));
+            mSearchAdapter.addAll(savedInstanceState.getParcelableArrayList(ARTIST_LIST_KEY));
             mSearchResultList.onRestoreInstanceState(savedInstanceState.getParcelable(STATE_KEY));
         }
     }

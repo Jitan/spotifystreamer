@@ -7,8 +7,6 @@ import nu.jitan.spotifystreamer.R;
 
 
 public final class TrackActivity extends AppCompatActivity {
-    private static final String TRACK_FRAGMENT_TAG = "track_fragment_tag";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,8 +15,15 @@ public final class TrackActivity extends AppCompatActivity {
         ButterKnife.inject(this);
 
         if (savedInstanceState == null) {
+            Bundle args = new Bundle();
+            TrackFragment trackFragment = new TrackFragment();
+
+            args.putParcelable(TrackFragment.ARTIST_KEY, getIntent().getParcelableExtra
+                (TrackFragment.ARTIST_KEY));
+            trackFragment.setArguments(args);
+
             getSupportFragmentManager().beginTransaction()
-                .add(R.id.activity_track_container, new TrackFragment(), TRACK_FRAGMENT_TAG)
+                .replace(R.id.track_container, trackFragment)
                 .commit();
         }
     }

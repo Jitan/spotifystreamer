@@ -1,4 +1,4 @@
-package nu.jitan.spotifystreamer.ui.artist;
+package nu.jitan.spotifystreamer.ui.search;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.model.MyArtist;
 
-public class ArtistAdapter extends ArrayAdapter<MyArtist> {
+public class SearchAdapter extends ArrayAdapter<MyArtist> {
     private ViewHolder mHolder;
     private LayoutInflater mInflater;
 
-    public ArtistAdapter(Context context) {
+    public SearchAdapter(Context context) {
         super(context, 0);
         mInflater = LayoutInflater.from(context);
     }
