@@ -62,7 +62,7 @@ public class TrackFragment extends Fragment {
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        if (mArtist != null) {
+        if (savedInstanceState == null && mArtist != null) {
             loadTopTracks(mArtist.getId());
             setActionBarSubtitle(mArtist.getName());
         }
