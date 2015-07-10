@@ -9,4 +9,5 @@
     <string name="error.artist.network">Could not load search results - Check network connection</string>
     <string name="error.tracks.network">Could not load tracks - Check network connection</string>
     <string name="error.tracks.notfound">No tracks found for this artist</string>
+    <string name="album_image">Album image</string>
 </resources>

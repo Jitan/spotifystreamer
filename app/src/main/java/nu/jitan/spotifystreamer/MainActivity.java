@@ -38,7 +38,7 @@ public final class MainActivity extends AppCompatActivity {
         EventBus.getDefault().register(this);
     }
 
-    public void onEventMainThread(ArtistClickedEvent event) {
+    public void onEvent(ArtistClickedEvent event) {
         if (mTwoPane) {
             Bundle args = new Bundle();
             args.putParcelable(TrackFragment.ARTIST_KEY, event.artist);

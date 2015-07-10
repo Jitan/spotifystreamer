@@ -1,9 +1,13 @@
 package nu.jitan.spotifystreamer.ui.track;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 import nu.jitan.spotifystreamer.R;
+import nu.jitan.spotifystreamer.event.TrackClickedEvent;
+import nu.jitan.spotifystreamer.ui.player.PlayerFragment;
 
 
 public final class TrackActivity extends AppCompatActivity {
@@ -26,5 +30,25 @@ public final class TrackActivity extends AppCompatActivity {
                 .replace(R.id.track_container, trackFragment)
                 .commit();
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    public void onEvent(TrackClickedEvent event) {
+        getSupportFragmentManager().beginTransaction()
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(android.R.id.content, new PlayerFragment())
+            .addToBackStack(null).commit();
+
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 }

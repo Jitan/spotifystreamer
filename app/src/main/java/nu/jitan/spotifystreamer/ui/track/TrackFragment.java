@@ -8,10 +8,12 @@ import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +23,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
 import nu.jitan.spotifystreamer.MainActivity;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
+import nu.jitan.spotifystreamer.event.TrackClickedEvent;
 import nu.jitan.spotifystreamer.model.MyArtist;
 import nu.jitan.spotifystreamer.model.MyTrack;
 import retrofit.Callback;
@@ -56,6 +59,15 @@ public class TrackFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_track, container, false);
         ButterKnife.inject(this, view);
         mTrackList.setAdapter(mTrackAdapter);
+        mTrackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mTrackAdapter.getCount() > 0) {
+                    EventBus.getDefault()
+                        .post(new TrackClickedEvent(mTrackAdapter.getItem(position)));
+                }
+            }
+        });
 
         return view;
     }
