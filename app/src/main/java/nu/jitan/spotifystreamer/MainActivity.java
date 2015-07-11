@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import de.greenrobot.event.EventBus;
 import nu.jitan.spotifystreamer.event.ArtistClickedEvent;
+import nu.jitan.spotifystreamer.event.TrackClickedEvent;
+import nu.jitan.spotifystreamer.ui.player.PlayerFragment;
 import nu.jitan.spotifystreamer.ui.search.SearchFragment;
 import nu.jitan.spotifystreamer.ui.track.TrackActivity;
 import nu.jitan.spotifystreamer.ui.track.TrackFragment;
@@ -51,6 +53,23 @@ public final class MainActivity extends AppCompatActivity {
             Intent loadTracksIntent = new Intent(this, TrackActivity.class);
             loadTracksIntent.putExtra(TrackFragment.ARTIST_KEY, event.artist);
             startActivity(loadTracksIntent);
+        }
+    }
+
+    public void onEvent(TrackClickedEvent event) {
+        if (mTwoPane) {
+            Bundle args = new Bundle();
+            args.putParcelable(Util.TRACK_KEY, event.track);
+
+            PlayerFragment playerFragment = new PlayerFragment();
+            playerFragment.setArguments(args);
+
+
+            playerFragment.show(getSupportFragmentManager(), "dialog");
+//            getSupportFragmentManager().beginTransaction()
+//                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+//                .add(R.id.track_container, playerFragment, Util.PLAYERFRAGMENT_TAG)
+//                .addToBackStack(null).commit();
         }
     }
 
