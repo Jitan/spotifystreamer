@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
@@ -24,7 +25,7 @@ public class PlayerFragment extends DialogFragment {
     @InjectView(R.id.player_album_name) TextView mAlbumName;
     @InjectView(R.id.player_album_image) ImageView mAlbumImage;
     @InjectView(R.id.player_track_name) TextView mTrackName;
-
+    private boolean mTwoPane;
 
 
     @Override
@@ -34,6 +35,7 @@ public class PlayerFragment extends DialogFragment {
         Bundle arguments = getArguments();
         if (arguments != null) {
             mTrack = arguments.getParcelable(Util.TRACK_KEY);
+            mTwoPane = arguments.getBoolean(Util.IS_TWOPANE_KEY);
         }
     }
 
@@ -52,6 +54,8 @@ public class PlayerFragment extends DialogFragment {
             String imgUrl = mTrack.getLargeImgUrl();
             Picasso.with(getActivity())
                 .load(imgUrl)
+                .fit()
+                .centerInside()
                 .into(mAlbumImage);
         }
         return view;
@@ -62,6 +66,21 @@ public class PlayerFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         return dialog;
+    }
+
+    @Override
+    public void onResume() {
+        if (mTwoPane) {
+            WindowManager.LayoutParams params = getDialog().getWindow().getAttributes();
+            final float scale = getResources().getDisplayMetrics().density;
+
+            params.width = (int) (650 * scale + 0.5f);
+            params.height = (int) (650 * scale + 0.5f);
+            getDialog().getWindow().setAttributes(params);
+        }
+
+        super.onResume();
     }
 }

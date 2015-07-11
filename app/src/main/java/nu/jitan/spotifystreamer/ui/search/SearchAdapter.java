@@ -34,8 +34,7 @@ public class SearchAdapter extends ArrayAdapter<MyArtist> {
             String artistThumbUrl = artist.getImgUrl();
             Picasso.with(getContext())
                 .load(artistThumbUrl)
-                .resizeDimen(R.dimen.listitem_imageview, R.dimen
-                    .listitem_imageview)
+                .resizeDimen(R.dimen.listitem_imageview, R.dimen.listitem_imageview)
                 .centerCrop()
                 .into(mHolder.imageView);
         }

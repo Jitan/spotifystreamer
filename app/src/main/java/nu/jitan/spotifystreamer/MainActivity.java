@@ -60,9 +60,10 @@ public final class MainActivity extends AppCompatActivity {
         if (mTwoPane) {
             Bundle args = new Bundle();
             args.putParcelable(Util.TRACK_KEY, event.track);
+            args.putBoolean(Util.IS_TWOPANE_KEY, mTwoPane);
+
             PlayerFragment playerFragment = new PlayerFragment();
             playerFragment.setArguments(args);
-
             playerFragment.show(getSupportFragmentManager(), "dialog");
         }
     }

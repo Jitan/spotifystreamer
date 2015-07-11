@@ -21,10 +21,10 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         />
-    <nu.jitan.spotifystreamer.model.SquareImageView
+    <ImageView
         android:id="@+id/player_album_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="@dimen/player_imageview"
+        android:layout_height="@dimen/player_imageview"
         android:contentDescription="@string/album_image"
         />
     <TextView

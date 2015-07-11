@@ -13,6 +13,7 @@ public final class Util {
     public static final String PLAYERFRAGMENT_TAG = "PLAYERTAG";
     public static final String TRACKFRAGMENT_TAG = "TRACKTAG";
     public static final String TRACK_KEY = "TRACKKEY";
+    public static final String IS_TWOPANE_KEY = "TWOPANEKEY";
 
     private Util() {
     }
@@ -56,6 +57,7 @@ public final class Util {
 
         String artists, albumName, trackName, thumbImgUrl, largeImgUrl, previewUrl;
         for (Track track : tracks.tracks) {
+
             StringBuilder stringBuilder = new StringBuilder();
             int numOfArtists = track.artists.size();
 
@@ -67,7 +69,7 @@ public final class Util {
             }
 
             artists = stringBuilder.toString();
-            albumName = track.album.name;
+            albumName = track.album.name.replaceAll("&apos;", "'");
             trackName = track.name;
             previewUrl = track.preview_url;
 
