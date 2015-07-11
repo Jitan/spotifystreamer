@@ -14,4 +14,7 @@
     <color name="orange">#FF9D2F</color>
     <color name="red">#FF432F</color>
 
+    <!-- app colors -->
+    <color name="background_holo_light">#fff3f3f3</color>
+
 </resources>

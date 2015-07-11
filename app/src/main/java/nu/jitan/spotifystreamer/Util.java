@@ -10,6 +10,9 @@ import nu.jitan.spotifystreamer.model.MyArtist;
 import nu.jitan.spotifystreamer.model.MyTrack;
 
 public final class Util {
+    public static final String PLAYERFRAGMENT_TAG = "PLAYERTAG";
+    public static final String TRACKFRAGMENT_TAG = "TRACKTAG";
+
     private Util() {
     }
 

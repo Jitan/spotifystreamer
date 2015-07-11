@@ -11,8 +11,6 @@ import nu.jitan.spotifystreamer.ui.track.TrackFragment;
 
 public final class MainActivity extends AppCompatActivity {
     private boolean mTwoPane;
-    private static final String TRACKFRAGMENT_TAG = "TRACKTAG";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

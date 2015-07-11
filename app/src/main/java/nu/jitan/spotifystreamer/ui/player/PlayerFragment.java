@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import nu.jitan.spotifystreamer.R;
 
-public class PlayerFragment extends DialogFragment{
+public class PlayerFragment extends DialogFragment {
 
     @Nullable
     @Override
