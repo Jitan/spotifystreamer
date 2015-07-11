@@ -9,15 +9,52 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ImageView;
+import android.widget.TextView;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import com.squareup.picasso.Picasso;
 import nu.jitan.spotifystreamer.R;
+import nu.jitan.spotifystreamer.Util;
+import nu.jitan.spotifystreamer.model.MyTrack;
 
 public class PlayerFragment extends DialogFragment {
+    private MyTrack mTrack;
+    @InjectView(R.id.player_artist_name) TextView mArtistName;
+    @InjectView(R.id.player_album_name) TextView mAlbumName;
+    @InjectView(R.id.player_album_image) ImageView mAlbumImage;
+    @InjectView(R.id.player_track_name) TextView mTrackName;
+
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mTrack = arguments.getParcelable(Util.TRACK_KEY);
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
         savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_player, container, false);
+        View view = inflater.inflate(R.layout.fragment_player, container, false);
+        ButterKnife.inject(this, view);
+
+        mArtistName.setText(mTrack.getArtists());
+        mAlbumName.setText(mTrack.getAlbumName());
+        mTrackName.setText(mTrack.getTrackName());
+
+        if (!mTrack.getLargeImgUrl().isEmpty()) {
+            String imgUrl = mTrack.getLargeImgUrl();
+            Picasso.with(getActivity())
+                .load(imgUrl)
+                .into(mAlbumImage);
+        }
+        return view;
     }
 
     @NonNull

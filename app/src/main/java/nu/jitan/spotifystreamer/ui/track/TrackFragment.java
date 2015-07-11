@@ -8,7 +8,6 @@ import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import butterknife.ButterKnife;
@@ -59,13 +58,10 @@ public class TrackFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_track, container, false);
         ButterKnife.inject(this, view);
         mTrackList.setAdapter(mTrackAdapter);
-        mTrackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mTrackAdapter.getCount() > 0) {
-                    EventBus.getDefault()
-                        .post(new TrackClickedEvent(mTrackAdapter.getItem(position)));
-                }
+        mTrackList.setOnItemClickListener((parent, view1, position, id) -> {
+            if (mTrackAdapter.getCount() > 0) {
+                EventBus.getDefault()
+                    .post(new TrackClickedEvent(mTrackAdapter.getItem(position)));
             }
         });
 

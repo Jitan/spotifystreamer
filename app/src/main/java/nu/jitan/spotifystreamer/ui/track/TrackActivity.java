@@ -40,9 +40,14 @@ public final class TrackActivity extends AppCompatActivity {
     }
 
     public void onEvent(TrackClickedEvent event) {
+        Bundle args = new Bundle();
+        args.putParcelable(Util.TRACK_KEY, event.track);
+        PlayerFragment playerFragment = new PlayerFragment();
+        playerFragment.setArguments(args);
+
         getSupportFragmentManager().beginTransaction()
             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(R.id.track_container, new PlayerFragment(), Util.PLAYERFRAGMENT_TAG)
+            .add(R.id.track_container, playerFragment, Util.PLAYERFRAGMENT_TAG)
             .addToBackStack(null).commit();
     }
 

@@ -54,8 +54,19 @@ public final class Util {
     public static ArrayList<MyTrack> extractTrackData(Tracks tracks) {
         final ArrayList<MyTrack> myTrackList = new ArrayList<>();
 
-        String albumName, trackName, thumbImgUrl, largeImgUrl, previewUrl;
+        String artists, albumName, trackName, thumbImgUrl, largeImgUrl, previewUrl;
         for (Track track : tracks.tracks) {
+            StringBuilder stringBuilder = new StringBuilder();
+            int numOfArtists = track.artists.size();
+
+            for (int i = 0; i < numOfArtists; i++) {
+                stringBuilder.append(track.artists.get(i).name);
+                if (i != numOfArtists - 1) {
+                    stringBuilder.append(", ");
+                }
+            }
+
+            artists = stringBuilder.toString();
             albumName = track.album.name;
             trackName = track.name;
             previewUrl = track.preview_url;
@@ -68,7 +79,7 @@ public final class Util {
                 thumbImgUrl = "";
                 largeImgUrl = "";
             }
-            myTrackList.add(MyTrack.create(albumName, trackName, thumbImgUrl, largeImgUrl,
+            myTrackList.add(MyTrack.create(artists, albumName, trackName, thumbImgUrl, largeImgUrl,
                 previewUrl));
         }
         return myTrackList;
