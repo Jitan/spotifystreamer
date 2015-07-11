@@ -13,24 +13,24 @@
         android:id="@+id/player_artist_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:lines="2"
         android:gravity="center_horizontal"
         />
     <TextView
         android:id="@+id/player_album_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:lines="2"
         android:gravity="center_horizontal"
         />
-    <nu.jitan.spotifystreamer.model.SquareImageView
-        android:id="@+id/player_album_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:contentDescription="@string/album_image"
-        />
+
+    <include layout="@layout/imageview_player"/>
+
     <TextView
         android:id="@+id/player_track_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:lines="2"
         android:gravity="center_horizontal"
         />
     <SeekBar
@@ -40,11 +40,10 @@
         />
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/player_imageview_phone"
         android:paddingStart="30dp"
-        android:paddingLeft="30dp"
         android:paddingEnd="30dp"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         style="?attr/buttonBarButtonStyle"
         >
         <Button
@@ -55,9 +54,8 @@
             style="?attr/buttonBarButtonStyle"
             />
         <Space
-            android:layout_width="0dp"
+            android:layout_width="30dp"
             android:layout_height="0dp"
-            android:layout_weight="1"
             />
         <Button
             android:id="@+id/play_pause"
@@ -67,9 +65,8 @@
             style="?attr/buttonBarButtonStyle"
             />
         <Space
-            android:layout_width="0dp"
+            android:layout_width="30dp"
             android:layout_height="0dp"
-            android:layout_weight="1"
             />
         <Button
             android:id="@+id/next_track"

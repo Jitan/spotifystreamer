@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
-    android:divider="?android:attr/dividerHorizontal"
+    android:background="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
     tools:context="nu.jitan.spotifystreamer.MainActivity"
     >

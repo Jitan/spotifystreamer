@@ -4,5 +4,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="listitem_imageview">80dp</dimen>
     <dimen name="listitem_height">110dp</dimen>
-    <dimen name="player_imageview">400dp</dimen>
+    <dimen name="player_imageview_tablet">350dp</dimen>
+    <dimen name="player_imageview_phone">70dp</dimen>
 </resources>

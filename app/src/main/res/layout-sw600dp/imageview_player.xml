@@ -1,0 +1,6 @@
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/player_album_image"
+    android:layout_width="@dimen/player_imageview_tablet"
+    android:layout_height="@dimen/player_imageview_tablet"
+    android:contentDescription="@string/album_image"
+    />
