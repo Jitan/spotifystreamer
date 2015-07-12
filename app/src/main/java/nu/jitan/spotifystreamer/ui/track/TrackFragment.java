@@ -61,10 +61,9 @@ public class TrackFragment extends Fragment {
         mTrackList.setOnItemClickListener((parent, view1, position, id) -> {
             if (mTrackAdapter.getCount() > 0) {
                 EventBus.getDefault()
-                    .post(new TrackClickedEvent(mTrackAdapter.getItem(position)));
+                    .post(new TrackClickedEvent(mTrackAdapter.getList(), position));
             }
         });
-
         return view;
     }
 
@@ -99,7 +98,6 @@ public class TrackFragment extends Fragment {
             actionbar.setSubtitle(artistName);
         }
     }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

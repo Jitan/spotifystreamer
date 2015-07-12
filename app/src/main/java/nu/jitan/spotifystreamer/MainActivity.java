@@ -59,7 +59,8 @@ public final class MainActivity extends AppCompatActivity {
     public void onEvent(TrackClickedEvent event) {
         if (mTwoPane) {
             Bundle args = new Bundle();
-            args.putParcelable(Util.TRACK_KEY, event.track);
+            args.putParcelableArrayList(Util.TRACKLIST_KEY, event.trackList);
+            args.putInt(Util.TRACKLIST_POSITION_KEY, event.trackListPos);
             args.putBoolean(Util.IS_TWOPANE_KEY, mTwoPane);
 
             PlayerFragment playerFragment = new PlayerFragment();

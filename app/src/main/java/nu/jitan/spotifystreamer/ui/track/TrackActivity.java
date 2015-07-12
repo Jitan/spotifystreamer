@@ -41,7 +41,8 @@ public final class TrackActivity extends AppCompatActivity {
 
     public void onEvent(TrackClickedEvent event) {
         Intent loadPlayerIntent = new Intent(this, PlayerActivity.class);
-        loadPlayerIntent.putExtra(Util.TRACK_KEY, event.track);
+        loadPlayerIntent.putExtra(Util.TRACKLIST_KEY, event.trackList);
+        loadPlayerIntent.putExtra(Util.TRACKLIST_POSITION_KEY, event.trackListPos);
         startActivity(loadPlayerIntent);
     }
 

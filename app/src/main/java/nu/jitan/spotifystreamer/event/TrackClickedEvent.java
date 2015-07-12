@@ -1,11 +1,14 @@
 package nu.jitan.spotifystreamer.event;
 
+import java.util.ArrayList;
 import nu.jitan.spotifystreamer.model.MyTrack;
 
 public class TrackClickedEvent {
-    public MyTrack track;
+    public ArrayList<MyTrack> trackList;
+    public int trackListPos;
 
-    public TrackClickedEvent(MyTrack track) {
-        this.track = track;
+    public TrackClickedEvent(ArrayList<MyTrack> trackList, int trackListPos) {
+        this.trackList = trackList;
+        this.trackListPos = trackListPos;
     }
 }

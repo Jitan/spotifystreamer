@@ -10,10 +10,11 @@ import nu.jitan.spotifystreamer.model.MyArtist;
 import nu.jitan.spotifystreamer.model.MyTrack;
 
 public final class Util {
-    public static final String PLAYERFRAGMENT_TAG = "PLAYERTAG";
-    public static final String TRACKFRAGMENT_TAG = "TRACKTAG";
-    public static final String TRACK_KEY = "TRACKKEY";
-    public static final String IS_TWOPANE_KEY = "TWOPANEKEY";
+    public static final String PLAYERFRAGMENT_TAG = "nu.jitan.spotifystreamer.PLAYER_TAG";
+    public static final String TRACKFRAGMENT_TAG = "nu.jitan.spotifystreamer.TRACK_TAG";
+    public static final String TRACKLIST_KEY = "nu.jitan.spotifystreamer.TRACKLIST_KEY";
+    public static final String TRACKLIST_POSITION_KEY = "nu.jitan.spotifystreamer.TRACKLIST_POSITION_KEY";
+    public static final String IS_TWOPANE_KEY = "nu.jitan.spotifystreamer.IS_TWOPANE_KEY";
 
     private Util() {
     }

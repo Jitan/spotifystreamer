@@ -16,7 +16,12 @@ public class PlayerActivity extends AppCompatActivity {
             Bundle args = new Bundle();
             PlayerFragment playerFragment = new PlayerFragment();
 
-            args.putParcelable(Util.TRACK_KEY, getIntent().getParcelableExtra(Util.TRACK_KEY));
+            args.putParcelableArrayList(Util.TRACKLIST_KEY,
+                getIntent().getParcelableArrayListExtra(Util.TRACKLIST_KEY));
+
+            args.putInt(Util.TRACKLIST_POSITION_KEY,
+                getIntent().getIntExtra(Util.TRACKLIST_POSITION_KEY, 0));
+
             playerFragment.setArguments(args);
 
             getSupportFragmentManager().beginTransaction()

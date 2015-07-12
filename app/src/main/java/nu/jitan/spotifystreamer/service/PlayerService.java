@@ -4,47 +4,106 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import java.io.IOException;
+import java.util.ArrayList;
+import nu.jitan.spotifystreamer.model.MyTrack;
 import trikita.log.Log;
 
-public class PlayerService extends Service {
-    public static final String ACTION_PLAY = "nu.jitan.spotifystreamer.PLAY";
+public class PlayerService extends Service implements
+    MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
+    MediaPlayer.OnCompletionListener {
+
+    private final IBinder playerBind = new PlayerBinder();
     private MediaPlayer mMediaPlayer = null;
 
+    private ArrayList<MyTrack> mTrackList;
+    private boolean mTrackIsLoaded = false;
+    private int mTrackListPos;
+
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onCreate() {
+        super.onCreate();
+        mTrackListPos = 0;
+        mMediaPlayer = new MediaPlayer();
+        initPlayer();
+    }
 
-        if (intent.getAction().equals(ACTION_PLAY)) {
-            mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            try {
-                mMediaPlayer.setDataSource(intent.getStringExtra("url"));
-                mMediaPlayer.setOnPreparedListener(MediaPlayer::start);
-                mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                    @Override
-                    public boolean onError(MediaPlayer mp, int what, int extra) {
-                        Log.d("MediaPlayer error, codes: ", what, extra);
-                        return false;
-                    }
-                });
-                mMediaPlayer.prepareAsync();
-            } catch (IOException e) {
-                //TODO Handle this exception gracefully..
-                mMediaPlayer.release();
-                mMediaPlayer = null;
-                e.printStackTrace();
-            }
+    public void initPlayer() {
+        mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setOnPreparedListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
+        mMediaPlayer.setOnErrorListener(this);
+    }
 
+    public void setList(ArrayList<MyTrack> trackList) {
+        mTrackList = trackList;
+    }
+
+    public void playNewTrack() {
+        mMediaPlayer.reset();
+        setDataSource();
+        mMediaPlayer.prepareAsync();
+    }
+
+    private void setDataSource() {
+        try {
+            mMediaPlayer.setDataSource(mTrackList.get(mTrackListPos).getPreviewUrl());
+            mTrackIsLoaded = true;
+        } catch (IOException e) {
+            Log.e("MUSIC SERVICE", "Error setting data source", e);
         }
+    }
 
-        return 0;
+    public void pausePlay() {
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+        } else if (mTrackIsLoaded) {
+            mMediaPlayer.start();
+        } else {
+            playNewTrack();
+        }
+    }
+
+    public void setTrack(int trackIndex) {
+        mTrackListPos = trackIndex;
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mp.start();
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        Log.d("MediaPlayer error, codes: ", what, extra);
+        return false;
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return playerBind;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        mMediaPlayer.stop();
+        mMediaPlayer.release();
+        return false;
+    }
+
+    public class PlayerBinder extends Binder {
+        public PlayerService getService() {
+            return PlayerService.this;
+        }
     }
 
     @Override
