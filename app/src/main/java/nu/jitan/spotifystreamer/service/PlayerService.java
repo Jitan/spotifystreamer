@@ -21,12 +21,12 @@ public class PlayerService extends Service implements
 
     private ArrayList<MyTrack> mTrackList;
     private boolean mTrackIsLoaded = false;
-    private int mTrackListPos;
+    private int mCurrentTrackIndex;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mTrackListPos = 0;
+        mCurrentTrackIndex = 0;
         mMediaPlayer = new MediaPlayer();
         initPlayer();
     }
@@ -51,7 +51,7 @@ public class PlayerService extends Service implements
 
     private void setDataSource() {
         try {
-            mMediaPlayer.setDataSource(mTrackList.get(mTrackListPos).getPreviewUrl());
+            mMediaPlayer.setDataSource(mTrackList.get(mCurrentTrackIndex).getPreviewUrl());
             mTrackIsLoaded = true;
         } catch (IOException e) {
             Log.e("MUSIC SERVICE", "Error setting data source", e);
@@ -69,7 +69,17 @@ public class PlayerService extends Service implements
     }
 
     public void setTrack(int trackIndex) {
-        mTrackListPos = trackIndex;
+        if (trackIndex >= 0 && trackIndex < mTrackList.size()) {
+            mCurrentTrackIndex = trackIndex;
+            playNewTrack();
+        }
+    }
+
+    public void nextTrack() {
+
+    }
+
+    public void previousTrack() {
     }
 
     @Override

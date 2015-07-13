@@ -17,6 +17,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -38,8 +39,9 @@ public class PlayerFragment extends DialogFragment {
     private PlayerService mPlayerService;
     private Intent mPlayIntent;
     private ArrayList<MyTrack> mTrackList;
+    private MyTrack mCurrentTrack;
 
-    private int mCurrentTrack;
+    private int mCurrentTrackIndex;
     private boolean mTwoPane;
     private boolean mPlayerBound = false;
 
@@ -50,7 +52,7 @@ public class PlayerFragment extends DialogFragment {
         Bundle arguments = getArguments();
         if (arguments != null) {
             mTrackList = arguments.getParcelableArrayList(Util.TRACKLIST_KEY);
-            mCurrentTrack = arguments.getInt(Util.TRACKLIST_POSITION_KEY);
+            mCurrentTrackIndex = arguments.getInt(Util.TRACKLIST_POSITION_KEY);
             mTwoPane = arguments.getBoolean(Util.IS_TWOPANE_KEY);
         }
     }
@@ -78,7 +80,12 @@ public class PlayerFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         ButterKnife.inject(this, view);
 
-        MyTrack track = mTrackList.get(mCurrentTrack);
+        updateTrackUi();
+        return view;
+    }
+
+    private void updateTrackUi() {
+        MyTrack track = mTrackList.get(mCurrentTrackIndex);
         mArtistName.setText(track.getArtists());
         mAlbumName.setText(track.getAlbumName());
         mTrackName.setText(track.getTrackName());
@@ -91,7 +98,6 @@ public class PlayerFragment extends DialogFragment {
                 .centerInside()
                 .into(mAlbumImage);
         }
-        return view;
     }
 
     @Override
@@ -107,6 +113,34 @@ public class PlayerFragment extends DialogFragment {
     @OnClick(R.id.player_play_pause)
     public void pausePlayAction() {
         mPlayerService.pausePlay();
+    }
+
+    @OnClick(R.id.player_next_track)
+    public void nextTrackAction() {
+        int newIndex = mCurrentTrackIndex + 1;
+        if (newIndex >= 0 && newIndex < mTrackList.size()) {
+            mCurrentTrackIndex = newIndex;
+        } else {
+            mCurrentTrackIndex = 0;
+            Toast.makeText(getActivity(), "No more tracks in list, repeating", Toast
+                .LENGTH_SHORT).show();
+        }
+        updateTrackUi();
+        mPlayerService.setTrack(mCurrentTrackIndex);
+    }
+
+    @OnClick(R.id.player_previous_track)
+    public void previousTrackAction() {
+        int newIndex = mCurrentTrackIndex - 1;
+        if (newIndex >= 0 && newIndex < mTrackList.size()) {
+            mCurrentTrackIndex = newIndex;
+        }else {
+            mCurrentTrackIndex = mTrackList.size() - 1;
+            Toast.makeText(getActivity(), "No more tracks in list, repeating", Toast
+                .LENGTH_SHORT).show();
+        }
+        updateTrackUi();
+        mPlayerService.setTrack(mCurrentTrackIndex);
     }
 
     @NonNull
