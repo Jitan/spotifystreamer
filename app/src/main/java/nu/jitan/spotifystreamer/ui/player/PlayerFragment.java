@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,12 +17,14 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import com.squareup.picasso.Picasso;
+import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
@@ -35,12 +38,15 @@ public class PlayerFragment extends DialogFragment {
     @InjectView(R.id.player_album_name) TextView mAlbumName;
     @InjectView(R.id.player_album_image) ImageView mAlbumImage;
     @InjectView(R.id.player_track_name) TextView mTrackName;
+    @InjectView(R.id.player_seekbar) SeekBar mSeekBar;
 
     private PlayerService mPlayerService;
     private Intent mPlayIntent;
     private ArrayList<MyTrack> mTrackList;
     private MyTrack mCurrentTrack;
+    private Handler mHandler;
 
+    private int mInterval = 100;
     private int mCurrentTrackIndex;
     private boolean mTwoPane;
     private boolean mPlayerBound = false;
@@ -49,6 +55,7 @@ public class PlayerFragment extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mHandler = new Handler();
         Bundle arguments = getArguments();
         if (arguments != null) {
             mTrackList = arguments.getParcelableArrayList(Util.TRACKLIST_KEY);
@@ -56,22 +63,6 @@ public class PlayerFragment extends DialogFragment {
             mTwoPane = arguments.getBoolean(Util.IS_TWOPANE_KEY);
         }
     }
-
-    private ServiceConnection playerConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            PlayerBinder binder = (PlayerBinder) service;
-            mPlayerService = ((PlayerBinder) service).getService();
-            mPlayerService.setList(mTrackList);
-            mPlayerBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mPlayerBound = false;
-        }
-    };
-
 
     @Nullable
     @Override
@@ -100,15 +91,51 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
+    private Runnable mSeekbarUpdater = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.postDelayed(mSeekbarUpdater, mInterval);
+            updateSeekbar();
+        }
+    };
+
+    private void updateSeekbar() {
+        mSeekBar.setProgress(mPlayerService.getCurrentPosition());
+    }
+
+    private ServiceConnection playerConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            PlayerBinder binder = (PlayerBinder) service;
+            mPlayerService = ((PlayerBinder) service).getService();
+            mPlayerService.setList(mTrackList);
+            mPlayerBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mPlayerBound = false;
+        }
+    };
+
     @Override
     public void onStart() {
         super.onStart();
+        EventBus.getDefault().register(this);
+
         if (mPlayIntent == null) {
             mPlayIntent = new Intent(getActivity(), PlayerService.class);
             getActivity().bindService(mPlayIntent, playerConnection, Context.BIND_AUTO_CREATE);
             getActivity().startService(mPlayIntent);
         }
     }
+
+    public void onEvent(PlaybackPreparedEvent event) {
+        mSeekBar.setMax(event.duration);
+        mPlayerService.pausePlay();
+        mSeekbarUpdater.run();
+    }
+
 
     @OnClick(R.id.player_play_pause)
     public void pausePlayAction() {
@@ -134,7 +161,7 @@ public class PlayerFragment extends DialogFragment {
         int newIndex = mCurrentTrackIndex - 1;
         if (newIndex >= 0 && newIndex < mTrackList.size()) {
             mCurrentTrackIndex = newIndex;
-        }else {
+        } else {
             mCurrentTrackIndex = mTrackList.size() - 1;
             Toast.makeText(getActivity(), "No more tracks in list, repeating", Toast
                 .LENGTH_SHORT).show();
@@ -154,7 +181,9 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onStop() {
         super.onStop();
+        EventBus.getDefault().unregister(this);
         getActivity().unbindService(playerConnection);
+        mHandler.removeCallbacks(mSeekbarUpdater);
     }
 
     @Override

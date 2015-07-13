@@ -23,7 +23,6 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
-import nu.jitan.spotifystreamer.event.ArtistClickedEvent;
 import nu.jitan.spotifystreamer.model.MyArtist;
 import retrofit.Callback;
 import retrofit.RetrofitError;

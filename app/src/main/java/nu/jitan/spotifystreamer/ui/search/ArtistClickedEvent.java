@@ -1,4 +1,4 @@
-package nu.jitan.spotifystreamer.event;
+package nu.jitan.spotifystreamer.ui.search;
 
 import nu.jitan.spotifystreamer.model.MyArtist;
 

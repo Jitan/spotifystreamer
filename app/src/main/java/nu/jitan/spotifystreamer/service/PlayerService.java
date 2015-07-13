@@ -7,8 +7,10 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import de.greenrobot.event.EventBus;
 import java.io.IOException;
 import java.util.ArrayList;
+import nu.jitan.spotifystreamer.ui.player.PlaybackPreparedEvent;
 import nu.jitan.spotifystreamer.model.MyTrack;
 import trikita.log.Log;
 
@@ -20,7 +22,8 @@ public class PlayerService extends Service implements
     private MediaPlayer mMediaPlayer = null;
 
     private ArrayList<MyTrack> mTrackList;
-    private boolean mTrackIsLoaded = false;
+    private boolean mTrackDataIsSet = false;
+    private boolean mTrackIsPrepared = false;
     private int mCurrentTrackIndex;
 
     @Override
@@ -52,7 +55,7 @@ public class PlayerService extends Service implements
     private void setDataSource() {
         try {
             mMediaPlayer.setDataSource(mTrackList.get(mCurrentTrackIndex).getPreviewUrl());
-            mTrackIsLoaded = true;
+            mTrackDataIsSet = true;
         } catch (IOException e) {
             Log.e("MUSIC SERVICE", "Error setting data source", e);
         }
@@ -61,7 +64,7 @@ public class PlayerService extends Service implements
     public void pausePlay() {
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
-        } else if (mTrackIsLoaded) {
+        } else if (mTrackDataIsSet) {
             mMediaPlayer.start();
         } else {
             playNewTrack();
@@ -75,16 +78,26 @@ public class PlayerService extends Service implements
         }
     }
 
-    public void nextTrack() {
-
+    public int getDuration() {
+        if (mTrackIsPrepared) {
+            return mMediaPlayer.getDuration();
+        } else {
+            return 0;
+        }
     }
 
-    public void previousTrack() {
+    public int getCurrentPosition() {
+        if (mTrackDataIsSet) {
+            return mMediaPlayer.getCurrentPosition();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mp.start();
+        mTrackIsPrepared = true;
+        EventBus.getDefault().post(new PlaybackPreparedEvent(mMediaPlayer.getDuration()));
     }
 
     @Override

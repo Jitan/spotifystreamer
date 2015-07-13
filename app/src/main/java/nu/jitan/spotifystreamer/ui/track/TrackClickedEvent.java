@@ -1,4 +1,4 @@
-package nu.jitan.spotifystreamer.event;
+package nu.jitan.spotifystreamer.ui.track;
 
 import java.util.ArrayList;
 import nu.jitan.spotifystreamer.model.MyTrack;

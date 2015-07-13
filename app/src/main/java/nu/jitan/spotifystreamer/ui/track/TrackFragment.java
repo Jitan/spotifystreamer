@@ -22,7 +22,6 @@ import kaaes.spotify.webapi.android.models.Tracks;
 import nu.jitan.spotifystreamer.MainActivity;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
-import nu.jitan.spotifystreamer.event.TrackClickedEvent;
 import nu.jitan.spotifystreamer.model.MyArtist;
 import nu.jitan.spotifystreamer.model.MyTrack;
 import retrofit.Callback;

@@ -7,7 +7,6 @@ import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
-import nu.jitan.spotifystreamer.event.TrackClickedEvent;
 import nu.jitan.spotifystreamer.ui.player.PlayerActivity;
 
 
