@@ -12,11 +12,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import nu.jitan.spotifystreamer.ui.player.PlaybackPreparedEvent;
 import nu.jitan.spotifystreamer.model.MyTrack;
+import nu.jitan.spotifystreamer.ui.player.SeekToFinishedEvent;
 import trikita.log.Log;
 
 public class PlayerService extends Service implements
     MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
-    MediaPlayer.OnCompletionListener {
+    MediaPlayer.OnCompletionListener, MediaPlayer.OnSeekCompleteListener{
 
     private final IBinder playerBind = new PlayerBinder();
     private MediaPlayer mMediaPlayer = null;
@@ -94,6 +95,12 @@ public class PlayerService extends Service implements
         }
     }
 
+    public void seekTo(int progress) {
+        if (mTrackIsPrepared) {
+            mMediaPlayer.seekTo(progress);
+        }
+    }
+
     @Override
     public void onPrepared(MediaPlayer mp) {
         mTrackIsPrepared = true;
@@ -109,6 +116,10 @@ public class PlayerService extends Service implements
     @Override
     public void onCompletion(MediaPlayer mp) {
 
+    }
+    @Override
+    public void onSeekComplete(MediaPlayer mp) {
+        EventBus.getDefault().post(new SeekToFinishedEvent());
     }
 
     @Override

@@ -10,8 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +37,7 @@ public class TrackFragment extends Fragment {
     private ArrayList<MyTrack> mLastSearchResults;
     private TrackAdapter mTrackAdapter;
     private SpotifyService mSpotifyService;
-    @InjectView(R.id.listview_track) ListView mTrackList;
+    @Bind(R.id.listview_track) ListView mTrackList;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,7 +55,7 @@ public class TrackFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
         savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_track, container, false);
-        ButterKnife.inject(this, view);
+        ButterKnife.bind(this, view);
         mTrackList.setAdapter(mTrackAdapter);
         mTrackList.setOnItemClickListener((parent, view1, position, id) -> {
             if (mTrackAdapter.getCount() > 0) {
@@ -135,5 +135,11 @@ public class TrackFragment extends Fragment {
             }
         });
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 }

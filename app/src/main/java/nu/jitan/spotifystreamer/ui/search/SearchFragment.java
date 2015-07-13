@@ -15,7 +15,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import butterknife.OnItemClick;
 import de.greenrobot.event.EventBus;
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -33,8 +33,8 @@ public class SearchFragment extends Fragment {
     private static final String ARTIST_LIST_KEY = "nu.jitan.spotifystreamer.artistlistkey";
     private SpotifyService mSpotifyService;
     private SearchAdapter mSearchAdapter;
-    @InjectView(R.id.searchview) SearchView mSearchView;
-    @InjectView(R.id.listview_search) ListView mSearchResultList;
+    @Bind(R.id.searchview) SearchView mSearchView;
+    @Bind(R.id.listview_search) ListView mSearchResultList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,7 @@ public class SearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
         savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
-        ButterKnife.inject(this, view);
+        ButterKnife.bind(this, view);
 
         mSearchResultList.setAdapter(mSearchAdapter);
         setupSearchView();
@@ -128,5 +128,11 @@ public class SearchFragment extends Fragment {
             null);
         ImageView magImage = ButterKnife.findById(mSearchView, magId);
         magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 }

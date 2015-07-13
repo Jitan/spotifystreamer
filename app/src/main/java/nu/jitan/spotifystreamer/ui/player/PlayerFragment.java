@@ -21,7 +21,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import butterknife.OnClick;
 import com.squareup.picasso.Picasso;
 import de.greenrobot.event.EventBus;
@@ -33,12 +33,13 @@ import nu.jitan.spotifystreamer.service.PlayerService;
 import nu.jitan.spotifystreamer.service.PlayerService.PlayerBinder;
 
 public class PlayerFragment extends DialogFragment {
+    private static final int SEEKBAR_UPDATE_INTERVAL = 100; // milliseonds
 
-    @InjectView(R.id.player_artist_name) TextView mArtistName;
-    @InjectView(R.id.player_album_name) TextView mAlbumName;
-    @InjectView(R.id.player_album_image) ImageView mAlbumImage;
-    @InjectView(R.id.player_track_name) TextView mTrackName;
-    @InjectView(R.id.player_seekbar) SeekBar mSeekBar;
+    @Bind(R.id.player_artist_name) TextView mArtistName;
+    @Bind(R.id.player_album_name) TextView mAlbumName;
+    @Bind(R.id.player_album_image) ImageView mAlbumImage;
+    @Bind(R.id.player_track_name) TextView mTrackName;
+    @Bind(R.id.player_seekbar) SeekBar mSeekBar;
 
     private PlayerService mPlayerService;
     private Intent mPlayIntent;
@@ -46,10 +47,10 @@ public class PlayerFragment extends DialogFragment {
     private MyTrack mCurrentTrack;
     private Handler mHandler;
 
-    private int mInterval = 100;
     private int mCurrentTrackIndex;
     private boolean mTwoPane;
     private boolean mPlayerBound = false;
+    private boolean mSeekBarIsBeingScrolled = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,9 +70,26 @@ public class PlayerFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
         savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
-        ButterKnife.inject(this, view);
+        ButterKnife.bind(this, view);
 
         updateTrackUi();
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                mSeekBarIsBeingScrolled = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mSeekBarIsBeingScrolled = false;
+                mPlayerService.seekTo(seekBar.getProgress());
+            }
+        });
         return view;
     }
 
@@ -91,18 +109,6 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
-    private Runnable mSeekbarUpdater = new Runnable() {
-        @Override
-        public void run() {
-            mHandler.postDelayed(mSeekbarUpdater, mInterval);
-            updateSeekbar();
-        }
-    };
-
-    private void updateSeekbar() {
-        mSeekBar.setProgress(mPlayerService.getCurrentPosition());
-    }
-
     private ServiceConnection playerConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -115,6 +121,7 @@ public class PlayerFragment extends DialogFragment {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mPlayerBound = false;
+            mPlayerService = null;
         }
     };
 
@@ -130,12 +137,43 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        if (mTwoPane) {
+            WindowManager.LayoutParams params = getDialog().getWindow().getAttributes();
+            final float scale = getResources().getDisplayMetrics().density;
+
+            params.width = (int) (650 * scale + 0.5f);
+            params.height = (int) (650 * scale + 0.5f);
+            getDialog().getWindow().setAttributes(params);
+        }
+        super.onResume();
+    }
+
+
     public void onEvent(PlaybackPreparedEvent event) {
         mSeekBar.setMax(event.duration);
         mPlayerService.pausePlay();
         mSeekbarUpdater.run();
     }
 
+    public void onEvent(SeekToFinishedEvent event) {
+
+    }
+
+    private Runnable mSeekbarUpdater = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.postDelayed(mSeekbarUpdater, SEEKBAR_UPDATE_INTERVAL);
+            updateSeekbar();
+        }
+    };
+
+    private void updateSeekbar() {
+        if (!mSeekBarIsBeingScrolled) {
+            mSeekBar.setProgress(mPlayerService.getCurrentPosition());
+        }
+    }
 
     @OnClick(R.id.player_play_pause)
     public void pausePlayAction() {
@@ -187,15 +225,8 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @Override
-    public void onResume() {
-        if (mTwoPane) {
-            WindowManager.LayoutParams params = getDialog().getWindow().getAttributes();
-            final float scale = getResources().getDisplayMetrics().density;
-
-            params.width = (int) (650 * scale + 0.5f);
-            params.height = (int) (650 * scale + 0.5f);
-            getDialog().getWindow().setAttributes(params);
-        }
-        super.onResume();
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 }

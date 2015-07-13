@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import nu.jitan.spotifystreamer.R;
@@ -61,12 +61,12 @@ public class TrackAdapter extends ArrayAdapter<MyTrack> {
     }
 
     static class ViewHolder {
-        @InjectView(R.id.listitem_track_imageview) ImageView albumArt;
-        @InjectView(R.id.listitem_track_name) TextView trackName;
-        @InjectView(R.id.listitem_track_album) TextView albumName;
+        @Bind(R.id.listitem_track_imageview) ImageView albumArt;
+        @Bind(R.id.listitem_track_name) TextView trackName;
+        @Bind(R.id.listitem_track_album) TextView albumName;
 
         public ViewHolder(View view) {
-            ButterKnife.inject(this, view);
+            ButterKnife.bind(this, view);
         }
     }
 }

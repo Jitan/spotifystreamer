@@ -16,7 +16,7 @@ public final class TrackActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         if (savedInstanceState == null) {
             Bundle args = new Bundle();
