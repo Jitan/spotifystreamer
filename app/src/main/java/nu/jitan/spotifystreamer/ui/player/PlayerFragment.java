@@ -33,7 +33,7 @@ import nu.jitan.spotifystreamer.service.PlayerService;
 import nu.jitan.spotifystreamer.service.PlayerService.PlayerBinder;
 
 public class PlayerFragment extends DialogFragment {
-    private static final int SEEKBAR_UPDATE_INTERVAL = 100; // milliseonds
+    private static final int SEEKBAR_UPDATE_INTERVAL = 100; // milliseconds
 
     @Bind(R.id.player_artist_name) TextView mArtistName;
     @Bind(R.id.player_album_name) TextView mAlbumName;

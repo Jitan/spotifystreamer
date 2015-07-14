@@ -1,5 +1,6 @@
 package nu.jitan.spotifystreamer.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -7,17 +8,20 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.v4.app.NotificationCompat;
 import de.greenrobot.event.EventBus;
 import java.io.IOException;
 import java.util.ArrayList;
-import nu.jitan.spotifystreamer.ui.player.PlaybackPreparedEvent;
+import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.model.MyTrack;
+import nu.jitan.spotifystreamer.ui.player.PlaybackPreparedEvent;
 import nu.jitan.spotifystreamer.ui.player.SeekToFinishedEvent;
 import trikita.log.Log;
 
 public class PlayerService extends Service implements
     MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
     MediaPlayer.OnCompletionListener, MediaPlayer.OnSeekCompleteListener{
+    private static final int NOTIFICATION_ID = 5005;
 
     private final IBinder playerBind = new PlayerBinder();
     private MediaPlayer mMediaPlayer = null;
@@ -101,9 +105,19 @@ public class PlayerService extends Service implements
         }
     }
 
+    private Notification getNotification() {
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(mTrackList.get(mCurrentTrackIndex).getArtists())
+            .setContentText(mTrackList.get(mCurrentTrackIndex).getTrackName());
+
+        return notificationBuilder.build();
+    }
+
     @Override
     public void onPrepared(MediaPlayer mp) {
         mTrackIsPrepared = true;
+        startForeground(NOTIFICATION_ID, getNotification());
         EventBus.getDefault().post(new PlaybackPreparedEvent(mMediaPlayer.getDuration()));
     }
 
