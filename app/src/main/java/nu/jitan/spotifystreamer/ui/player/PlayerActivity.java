@@ -1,5 +1,6 @@
 package nu.jitan.spotifystreamer.ui.player;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import nu.jitan.spotifystreamer.R;
@@ -28,5 +29,18 @@ public class PlayerActivity extends AppCompatActivity {
                 .replace(R.id.player_container, playerFragment)
                 .commit();
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
     }
 }

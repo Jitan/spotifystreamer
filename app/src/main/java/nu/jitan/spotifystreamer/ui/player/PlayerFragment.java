@@ -20,8 +20,8 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.ButterKnife;
 import butterknife.Bind;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.squareup.picasso.Picasso;
 import de.greenrobot.event.EventBus;
@@ -51,6 +51,7 @@ public class PlayerFragment extends DialogFragment {
     private boolean mTwoPane;
     private boolean mPlayerBound = false;
     private boolean mSeekBarIsBeingScrolled = false;
+    private boolean paused = false, playbackPaused = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -112,7 +113,6 @@ public class PlayerFragment extends DialogFragment {
     private ServiceConnection playerConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            PlayerBinder binder = (PlayerBinder) service;
             mPlayerService = ((PlayerBinder) service).getService();
             mPlayerService.setList(mTrackList);
             mPlayerBound = true;
@@ -130,11 +130,7 @@ public class PlayerFragment extends DialogFragment {
         super.onStart();
         EventBus.getDefault().register(this);
 
-        if (mPlayIntent == null) {
-            mPlayIntent = new Intent(getActivity(), PlayerService.class);
-            getActivity().bindService(mPlayIntent, playerConnection, Context.BIND_AUTO_CREATE);
-            getActivity().startService(mPlayIntent);
-        }
+
     }
 
     @Override
@@ -146,6 +142,12 @@ public class PlayerFragment extends DialogFragment {
             params.width = (int) (650 * scale + 0.5f);
             params.height = (int) (650 * scale + 0.5f);
             getDialog().getWindow().setAttributes(params);
+        }
+
+        if (mPlayIntent == null) {
+            mPlayIntent = new Intent(getActivity(), PlayerService.class);
+            getActivity().bindService(mPlayIntent, playerConnection, Context.BIND_AUTO_CREATE);
+            getActivity().startService(mPlayIntent);
         }
         super.onResume();
     }
@@ -217,11 +219,19 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        paused = true;
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
-        getActivity().unbindService(playerConnection);
         mHandler.removeCallbacks(mSeekbarUpdater);
+        if (mPlayerBound) {
+            getActivity().unbindService(playerConnection);
+        }
     }
 
     @Override

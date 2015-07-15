@@ -1,8 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
+    }
+}
+
 plugins {
     id "me.tatarka.retrolambda" version "3.1.0"
 }
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'com.jakewharton.hugo'
+
 
 android {
     compileSdkVersion 22
@@ -27,8 +39,6 @@ android {
     }
 }
 
-
-
 repositories {
     mavenCentral()
     maven {url "https://clojars.org/repo/"}
@@ -52,3 +62,4 @@ dependencies {
     compile 'com.github.frankiesardo:auto-parcel:0.3'
     apt 'com.github.frankiesardo:auto-parcel-processor:0.3'
 }
+
