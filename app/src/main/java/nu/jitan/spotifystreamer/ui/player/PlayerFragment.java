@@ -25,15 +25,19 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.squareup.picasso.Picasso;
 import de.greenrobot.event.EventBus;
+import hugo.weaving.DebugLog;
 import java.util.ArrayList;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
 import nu.jitan.spotifystreamer.model.MyTrack;
+import nu.jitan.spotifystreamer.service.events.PlaybackCompletedEvent;
+import nu.jitan.spotifystreamer.service.events.PlaybackPreparedEvent;
 import nu.jitan.spotifystreamer.service.PlayerService;
 import nu.jitan.spotifystreamer.service.PlayerService.PlayerBinder;
+import nu.jitan.spotifystreamer.service.events.SeekToFinishedEvent;
 
 public class PlayerFragment extends DialogFragment {
-    private static final int SEEKBAR_UPDATE_INTERVAL = 100; // milliseconds
+    private static final int SEEKBAR_UPDATE_INTERVAL = 1000; // milliseconds
 
     @Bind(R.id.player_artist_name) TextView mArtistName;
     @Bind(R.id.player_album_name) TextView mAlbumName;
@@ -53,6 +57,7 @@ public class PlayerFragment extends DialogFragment {
     private boolean mSeekBarIsBeingScrolled = false;
     private boolean paused = false, playbackPaused = false;
 
+    @DebugLog
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +71,7 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
+    @DebugLog
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
@@ -80,11 +86,13 @@ public class PlayerFragment extends DialogFragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             }
 
+            @DebugLog
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 mSeekBarIsBeingScrolled = true;
             }
 
+            @DebugLog
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mSeekBarIsBeingScrolled = false;
@@ -94,6 +102,7 @@ public class PlayerFragment extends DialogFragment {
         return view;
     }
 
+    @DebugLog
     private void updateTrackUi() {
         MyTrack track = mTrackList.get(mCurrentTrackIndex);
         mArtistName.setText(track.getArtists());
@@ -111,13 +120,15 @@ public class PlayerFragment extends DialogFragment {
     }
 
     private ServiceConnection playerConnection = new ServiceConnection() {
+        @DebugLog
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mPlayerService = ((PlayerBinder) service).getService();
-            mPlayerService.setList(mTrackList);
+            mPlayerService.setPlayList(mTrackList);
             mPlayerBound = true;
         }
 
+        @DebugLog
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mPlayerBound = false;
@@ -125,6 +136,7 @@ public class PlayerFragment extends DialogFragment {
         }
     };
 
+    @DebugLog
     @Override
     public void onStart() {
         super.onStart();
@@ -133,6 +145,7 @@ public class PlayerFragment extends DialogFragment {
 
     }
 
+    @DebugLog
     @Override
     public void onResume() {
         if (mTwoPane) {
@@ -152,13 +165,19 @@ public class PlayerFragment extends DialogFragment {
         super.onResume();
     }
 
-
+    @DebugLog
     public void onEvent(PlaybackPreparedEvent event) {
         mSeekBar.setMax(event.duration);
         mPlayerService.pausePlay();
         mSeekbarUpdater.run();
     }
 
+    @DebugLog
+    public void onEvent(PlaybackCompletedEvent event) {
+        stopSeekbarUpdates();
+    }
+
+    @DebugLog
     public void onEvent(SeekToFinishedEvent event) {
 
     }
@@ -177,39 +196,47 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
+    @DebugLog
+    private void stopSeekbarUpdates() {
+        mHandler.removeCallbacks(mSeekbarUpdater);
+    }
+
+    @DebugLog
     @OnClick(R.id.player_play_pause)
     public void pausePlayAction() {
         mPlayerService.pausePlay();
+        if (mHandler.hasMessages(0)) { // If we are checking for SeekBar updates
+            stopSeekbarUpdates();
+        } else {
+            mSeekbarUpdater.run();
+        }
     }
 
+    @DebugLog
     @OnClick(R.id.player_next_track)
     public void nextTrackAction() {
-        int newIndex = mCurrentTrackIndex + 1;
-        if (newIndex >= 0 && newIndex < mTrackList.size()) {
-            mCurrentTrackIndex = newIndex;
+        if (mPlayerService.nextTrack()) {
+            mCurrentTrackIndex++;
+            updateTrackUi();
         } else {
-            mCurrentTrackIndex = 0;
-            Toast.makeText(getActivity(), "No more tracks in list, repeating", Toast
+            Toast.makeText(getActivity(), "No more tracks in list", Toast
                 .LENGTH_SHORT).show();
         }
-        updateTrackUi();
-        mPlayerService.setTrack(mCurrentTrackIndex);
     }
 
+    @DebugLog
     @OnClick(R.id.player_previous_track)
     public void previousTrackAction() {
-        int newIndex = mCurrentTrackIndex - 1;
-        if (newIndex >= 0 && newIndex < mTrackList.size()) {
-            mCurrentTrackIndex = newIndex;
+        if (mPlayerService.prevTrack()) {
+            mCurrentTrackIndex--;
+            updateTrackUi();
         } else {
-            mCurrentTrackIndex = mTrackList.size() - 1;
-            Toast.makeText(getActivity(), "No more tracks in list, repeating", Toast
+            Toast.makeText(getActivity(), "No more tracks in list", Toast
                 .LENGTH_SHORT).show();
         }
-        updateTrackUi();
-        mPlayerService.setTrack(mCurrentTrackIndex);
     }
 
+    @DebugLog
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -218,12 +245,14 @@ public class PlayerFragment extends DialogFragment {
         return dialog;
     }
 
+    @DebugLog
     @Override
     public void onPause() {
         super.onPause();
         paused = true;
     }
 
+    @DebugLog
     @Override
     public void onStop() {
         super.onStop();
@@ -234,6 +263,7 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
+    @DebugLog
     @Override
     public void onDestroyView() {
         super.onDestroyView();

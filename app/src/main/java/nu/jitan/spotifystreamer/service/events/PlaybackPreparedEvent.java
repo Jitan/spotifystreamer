@@ -1,4 +1,4 @@
-package nu.jitan.spotifystreamer.ui.player;
+package nu.jitan.spotifystreamer.service.events;
 
 public class PlaybackPreparedEvent {
     public final int duration;

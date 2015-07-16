@@ -3,9 +3,11 @@ package nu.jitan.spotifystreamer.ui.player;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import hugo.weaving.DebugLog;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
 
+@DebugLog
 public class PlayerActivity extends AppCompatActivity {
 
     @Override
