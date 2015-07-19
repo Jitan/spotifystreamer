@@ -60,7 +60,6 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
     private boolean getAudioFocus() {
         int result = mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
             AudioManager.AUDIOFOCUS_GAIN);
-
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 

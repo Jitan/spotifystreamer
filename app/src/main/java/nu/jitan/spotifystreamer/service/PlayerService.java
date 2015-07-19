@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.model.MyTrack;
 import nu.jitan.spotifystreamer.service.events.UpdateUiEvent;
+import nu.jitan.spotifystreamer.ui.player.PlayerActivity;
 
 public final class PlayerService extends Service {
 
@@ -67,9 +68,7 @@ public final class PlayerService extends Service {
     @DebugLog
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         handleIntent(intent);
-
         if (mStreamPlayer == null) initPlayer();
 
         if (mStreamPlayer.isPlaying()) {
@@ -77,7 +76,6 @@ public final class PlayerService extends Service {
         } else {
             mMediaSession.setPlaybackState(buildPlaybackState());
         }
-
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -129,13 +127,15 @@ public final class PlayerService extends Service {
 
     @DebugLog
     public void onEvent(UpdateUiEvent event) {
+        updateMediaSessionMetaData(event.track);
+
         Notification updatedNotification;
         if (event.action == ACTION_PLAY) {
             updatedNotification = buildNotification(generateAction(R.drawable
-                .ic_action_playback_play, "Play", ACTION_PLAY), event.track);
+                .ic_action_playback_pause, "Pause", ACTION_PAUSE), event.track);
         } else {
             updatedNotification = buildNotification(generateAction(R.drawable
-                .ic_action_playback_pause, "Pause", ACTION_PAUSE), event.track);
+                .ic_action_playback_play, "Play", ACTION_PLAY), event.track);
         }
 
         if (foregroundNotificationStarted) {
@@ -145,24 +145,26 @@ public final class PlayerService extends Service {
             startForeground(NOTIFICATION_ID, updatedNotification);
             foregroundNotificationStarted = true;
         }
-
-        updateMediaSessionMetaData(event.track);
     }
 
     @DebugLog
     private Notification buildNotification(NotificationCompat.Action action, MyTrack track) {
 
-        Intent intent = new Intent(getApplicationContext(), PlayerService.class);
-        intent.setAction(ACTION_STOP);
-        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 1,
-            intent, 0);
+        Intent stopIntent = new Intent(getApplicationContext(), PlayerService.class);
+        stopIntent.setAction(ACTION_STOP);
+        PendingIntent pendingActionStopIntent = PendingIntent.getService(getApplicationContext(), 1,
+            stopIntent, 0);
+
+        Intent openPlayerIntent = new Intent(getApplicationContext(), PlayerActivity.class);
+        PendingIntent pendingOpenPlayerIntent = PendingIntent.getService(getApplicationContext(), 1,
+            openPlayerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.MediaStyle style = new NotificationCompat.MediaStyle()
             .setMediaSession(mMediaSession.getSessionToken())
             .setShowActionsInCompactView(0, 1, 2);
 
         style.setShowCancelButton(true);
-        style.setCancelButtonIntent(pendingIntent);
+        style.setCancelButtonIntent(pendingActionStopIntent);
 
         return new NotificationCompat.Builder(this)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -172,15 +174,15 @@ public final class PlayerService extends Service {
             .setTicker(track.getTrackName())
             .setContentTitle(track.getArtists())
             .setContentText(track.getTrackName())
-            .setDeleteIntent(pendingIntent)
-            .setContentIntent(pendingIntent)
+            .setDeleteIntent(pendingActionStopIntent)
+            .setContentIntent(pendingOpenPlayerIntent)
             .addAction(generateAction(R.drawable.ic_action_playback_prev, "Previous",
                 ACTION_PREVIOUS))
             .addAction(action)
-            .addAction(action).addAction(generateAction(R.drawable.ic_action_playback_next,
+            .addAction(generateAction(R.drawable.ic_action_playback_next,
                 "Next",
                 ACTION_NEXT))
-//            .setStyle(style)
+            .setStyle(style)
             .build();
     }
 
@@ -199,8 +201,6 @@ public final class PlayerService extends Service {
      */
     @DebugLog
     private void updateMediaSessionMetaData(MyTrack track) {
-        int playState = mStreamPlayer.isPlaying() ? PlaybackStateCompat.STATE_PLAYING :
-            PlaybackStateCompat.STATE_PAUSED;
 
         MediaMetadataCompat.Builder metaDataBuilder = new MediaMetadataCompat.Builder();
 
