@@ -30,11 +30,12 @@ import java.util.ArrayList;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
 import nu.jitan.spotifystreamer.model.MyTrack;
-import nu.jitan.spotifystreamer.service.events.PlaybackCompletedEvent;
-import nu.jitan.spotifystreamer.service.events.PlaybackPreparedEvent;
 import nu.jitan.spotifystreamer.service.PlayerService;
 import nu.jitan.spotifystreamer.service.PlayerService.PlayerBinder;
-import nu.jitan.spotifystreamer.service.events.SeekToFinishedEvent;
+import nu.jitan.spotifystreamer.service.events.NoMoreTracksEvent;
+import nu.jitan.spotifystreamer.service.events.PlaybackCompletedEvent;
+import nu.jitan.spotifystreamer.service.events.PlaybackPreparedEvent;
+import nu.jitan.spotifystreamer.service.events.UpdateUiEvent;
 
 public class PlayerFragment extends DialogFragment {
     private static final int SEEKBAR_UPDATE_INTERVAL = 1000; // milliseconds
@@ -79,7 +80,7 @@ public class PlayerFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         ButterKnife.bind(this, view);
 
-        updateTrackUi();
+        updateUi(mTrackList.get(mCurrentTrackIndex));
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -103,8 +104,7 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @DebugLog
-    private void updateTrackUi() {
-        MyTrack track = mTrackList.get(mCurrentTrackIndex);
+    private void updateUi(MyTrack track) {
         mArtistName.setText(track.getArtists());
         mAlbumName.setText(track.getAlbumName());
         mTrackName.setText(track.getTrackName());
@@ -124,7 +124,8 @@ public class PlayerFragment extends DialogFragment {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mPlayerService = ((PlayerBinder) service).getService();
-            mPlayerService.setPlayList(mTrackList);
+            mPlayerService.setTrackList(mTrackList);
+            mPlayerService.setCurrentTrack(mCurrentTrackIndex);
             mPlayerBound = true;
         }
 
@@ -141,8 +142,6 @@ public class PlayerFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
-
-
     }
 
     @DebugLog
@@ -166,6 +165,11 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @DebugLog
+    public void onEvent(UpdateUiEvent event) {
+        updateUi(event.track);
+    }
+
+    @DebugLog
     public void onEvent(PlaybackPreparedEvent event) {
         mSeekBar.setMax(event.duration);
         mPlayerService.pausePlay();
@@ -178,8 +182,9 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @DebugLog
-    public void onEvent(SeekToFinishedEvent event) {
-
+    public void onEvent(NoMoreTracksEvent event) {
+        Toast.makeText(getActivity(), "No more tracks in list", Toast
+            .LENGTH_SHORT).show();
     }
 
     private Runnable mSeekbarUpdater = new Runnable() {
@@ -215,25 +220,13 @@ public class PlayerFragment extends DialogFragment {
     @DebugLog
     @OnClick(R.id.player_next_track)
     public void nextTrackAction() {
-        if (mPlayerService.nextTrack()) {
-            mCurrentTrackIndex++;
-            updateTrackUi();
-        } else {
-            Toast.makeText(getActivity(), "No more tracks in list", Toast
-                .LENGTH_SHORT).show();
-        }
+        mPlayerService.nextTrack();
     }
 
     @DebugLog
     @OnClick(R.id.player_previous_track)
     public void previousTrackAction() {
-        if (mPlayerService.prevTrack()) {
-            mCurrentTrackIndex--;
-            updateTrackUi();
-        } else {
-            Toast.makeText(getActivity(), "No more tracks in list", Toast
-                .LENGTH_SHORT).show();
-        }
+        mPlayerService.prevTrack();
     }
 
     @DebugLog

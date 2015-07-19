@@ -12,6 +12,7 @@ plugins {
     id "me.tatarka.retrolambda" version "3.1.0"
 }
 apply plugin: 'com.android.application'
+apply plugin: 'com.zeroturnaround.jrebel.android'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.jakewharton.hugo'
 
