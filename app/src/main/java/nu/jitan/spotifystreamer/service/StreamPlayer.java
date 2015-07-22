@@ -189,6 +189,14 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
         EventBus.getDefault().post(new UpdateUiEvent(mCurrentTrack, playServiceActionString));
     }
 
+    public ArrayList<MyTrack> getTrackList() {
+        return mTrackList;
+    }
+
+    public int getCurrentTrackIndex() {
+        return mCurrentTrackIndex;
+    }
+
     @DebugLog
     @Override
     public void onPrepared(MediaPlayer mp) {

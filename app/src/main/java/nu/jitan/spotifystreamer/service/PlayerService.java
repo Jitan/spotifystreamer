@@ -19,6 +19,7 @@ import de.greenrobot.event.EventBus;
 import hugo.weaving.DebugLog;
 import java.util.ArrayList;
 import nu.jitan.spotifystreamer.R;
+import nu.jitan.spotifystreamer.Util;
 import nu.jitan.spotifystreamer.model.MyTrack;
 import nu.jitan.spotifystreamer.service.events.UpdateUiEvent;
 import nu.jitan.spotifystreamer.ui.player.PlayerActivity;
@@ -156,6 +157,8 @@ public final class PlayerService extends Service {
             stopIntent, 0);
 
         Intent openPlayerIntent = new Intent(getApplicationContext(), PlayerActivity.class);
+        openPlayerIntent.putExtra(Util.TRACKLIST_KEY, mStreamPlayer.getTrackList());
+        openPlayerIntent.putExtra(Util.TRACKLIST_POSITION_KEY, mStreamPlayer.getCurrentTrackIndex());
         PendingIntent pendingOpenPlayerIntent = PendingIntent.getService(getApplicationContext(), 1,
             openPlayerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 

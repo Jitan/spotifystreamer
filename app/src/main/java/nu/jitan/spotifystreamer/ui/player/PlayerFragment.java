@@ -47,9 +47,8 @@ public class PlayerFragment extends DialogFragment {
     @Bind(R.id.player_seekbar) SeekBar mSeekBar;
 
     private PlayerService mPlayerService;
-    private Intent mPlayIntent;
+    private Intent mStartPlayerIntent;
     private ArrayList<MyTrack> mTrackList;
-    private MyTrack mCurrentTrack;
     private Handler mHandler;
 
     private int mCurrentTrackIndex;
@@ -62,14 +61,13 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mHandler = new Handler();
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            mTrackList = arguments.getParcelableArrayList(Util.TRACKLIST_KEY);
-            mCurrentTrackIndex = arguments.getInt(Util.TRACKLIST_POSITION_KEY);
-            mTwoPane = arguments.getBoolean(Util.IS_TWOPANE_KEY);
-        }
+    }
+
+    public void setUiArguments(Bundle args) {
+        mTrackList = args.getParcelableArrayList(Util.TRACKLIST_KEY);
+        mCurrentTrackIndex = args.getInt(Util.TRACKLIST_POSITION_KEY);
+        mTwoPane = args.getBoolean(Util.IS_TWOPANE_KEY);
     }
 
     @DebugLog
@@ -80,7 +78,6 @@ public class PlayerFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         ButterKnife.bind(this, view);
 
-        updateUi(mTrackList.get(mCurrentTrackIndex));
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -119,7 +116,7 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
-    private ServiceConnection playerConnection = new ServiceConnection() {
+    private ServiceConnection mPlayerConnection = new ServiceConnection() {
         @DebugLog
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -156,10 +153,15 @@ public class PlayerFragment extends DialogFragment {
             getDialog().getWindow().setAttributes(params);
         }
 
-        if (mPlayIntent == null) {
-            mPlayIntent = new Intent(getActivity(), PlayerService.class);
-            getActivity().bindService(mPlayIntent, playerConnection, Context.BIND_AUTO_CREATE);
+        if (mStartPlayerIntent == null) {
+            mStartPlayerIntent = new Intent(getActivity(), PlayerService.class);
         }
+
+        getActivity().startService(mStartPlayerIntent);
+        getActivity().bindService(mStartPlayerIntent, mPlayerConnection, Context.BIND_AUTO_CREATE);
+
+        updateUi(mTrackList.get(mCurrentTrackIndex));
+
         super.onResume();
     }
 
@@ -251,7 +253,7 @@ public class PlayerFragment extends DialogFragment {
         EventBus.getDefault().unregister(this);
         mHandler.removeCallbacks(mSeekbarUpdater);
         if (mPlayerBound) {
-            getActivity().unbindService(playerConnection);
+            getActivity().unbindService(mPlayerConnection);
         }
     }
 
