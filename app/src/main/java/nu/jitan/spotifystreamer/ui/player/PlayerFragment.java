@@ -105,9 +105,16 @@ public class PlayerFragment extends DialogFragment {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mPlayerService = ((PlayerBinder) service).getService();
-            mPlayerService.setTrackList(mTrackList);
-            mPlayerService.setCurrentTrack(mCurrentTrackIndex);
+            if (!mPlayerService.isFirstLoad()) {
+                mPlayerService.setTrackList(mTrackList);
+                mPlayerService.setCurrentTrack(mCurrentTrackIndex);
+                updateUi(mTrackList.get(mCurrentTrackIndex));
+            } else {
+                updateUi(mPlayerService.getCurrentTrack());
+            }
             mPlayerBound = true;
+
+            registerEventBus();
         }
 
         @DebugLog
@@ -118,11 +125,20 @@ public class PlayerFragment extends DialogFragment {
         }
     };
 
+    private void registerEventBus() {
+        EventBus.getDefault().registerSticky(this);
+    }
+
     @DebugLog
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault().registerSticky(this);
+        if (mStartPlayerIntent == null) {
+            mStartPlayerIntent = new Intent(getActivity(), PlayerService.class);
+        }
+
+        getActivity().startService(mStartPlayerIntent);
+        getActivity().bindService(mStartPlayerIntent, mPlayerConnection, Context.BIND_AUTO_CREATE);
     }
 
     @DebugLog
@@ -136,16 +152,6 @@ public class PlayerFragment extends DialogFragment {
             params.height = (int) (650 * scale + 0.5f);
             getDialog().getWindow().setAttributes(params);
         }
-
-        if (mStartPlayerIntent == null) {
-            mStartPlayerIntent = new Intent(getActivity(), PlayerService.class);
-        }
-
-        getActivity().startService(mStartPlayerIntent);
-        getActivity().bindService(mStartPlayerIntent, mPlayerConnection, Context.BIND_AUTO_CREATE);
-
-        updateUi(mTrackList.get(mCurrentTrackIndex));
-
         super.onResume();
     }
 

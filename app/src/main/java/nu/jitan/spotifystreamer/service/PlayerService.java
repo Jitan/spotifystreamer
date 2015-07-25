@@ -158,7 +158,8 @@ public final class PlayerService extends Service {
 
         Intent openPlayerIntent = new Intent(getApplicationContext(), PlayerActivity.class);
         openPlayerIntent.putExtra(Util.TRACKLIST_KEY, mStreamPlayer.getTrackList());
-        openPlayerIntent.putExtra(Util.TRACKLIST_POSITION_KEY, mStreamPlayer.getCurrentTrackIndex());
+        openPlayerIntent.putExtra(Util.TRACKLIST_POSITION_KEY, mStreamPlayer.getCurrentTrackIndex
+            ());
         PendingIntent pendingOpenPlayerIntent = PendingIntent.getService(getApplicationContext(), 1,
             openPlayerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -244,11 +245,17 @@ public final class PlayerService extends Service {
         stopForeground(true);
     }
 
+    public boolean isFirstLoad() {
+        return mStreamPlayer.getTrackList() != null;
+    }
+
     @DebugLog
     public class PlayerBinder extends Binder {
+
         public PlayerService getService() {
             return PlayerService.this;
         }
+
     }
 
     @DebugLog
@@ -295,5 +302,13 @@ public final class PlayerService extends Service {
 
     public void seekTo(int progress) {
         mStreamPlayer.onSeekTo(progress);
+    }
+
+    public boolean isPlaying() {
+        return mStreamPlayer.isPlaying();
+    }
+
+    public MyTrack getCurrentTrack() {
+        return mStreamPlayer.getTrackList().get(mStreamPlayer.getCurrentTrackIndex());
     }
 }
