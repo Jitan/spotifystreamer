@@ -201,8 +201,9 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
     @Override
     public void onPrepared(MediaPlayer mp) {
         mTrackIsPrepared = true;
-        EventBus.getDefault().post(new PlaybackPreparedEvent(mMediaPlayer.getDuration()));
+        EventBus.getDefault().postSticky(new PlaybackPreparedEvent(mMediaPlayer.getDuration()));
         updateUi(PlayerService.ACTION_PLAY);
+        mMediaPlayer.start();
     }
 
     @DebugLog

@@ -100,22 +100,6 @@ public class PlayerFragment extends DialogFragment {
         return view;
     }
 
-    @DebugLog
-    private void updateUi(MyTrack track) {
-        mArtistName.setText(track.getArtists());
-        mAlbumName.setText(track.getAlbumName());
-        mTrackName.setText(track.getTrackName());
-
-        if (!track.getLargeImgUrl().isEmpty()) {
-            String imgUrl = track.getLargeImgUrl();
-            Picasso.with(getActivity())
-                .load(imgUrl)
-                .fit()
-                .centerInside()
-                .into(mAlbumImage);
-        }
-    }
-
     private ServiceConnection mPlayerConnection = new ServiceConnection() {
         @DebugLog
         @Override
@@ -138,7 +122,7 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
+        EventBus.getDefault().registerSticky(this);
     }
 
     @DebugLog
@@ -166,6 +150,22 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @DebugLog
+    private void updateUi(MyTrack track) {
+        mArtistName.setText(track.getArtists());
+        mAlbumName.setText(track.getAlbumName());
+        mTrackName.setText(track.getTrackName());
+
+        if (!track.getLargeImgUrl().isEmpty()) {
+            String imgUrl = track.getLargeImgUrl();
+            Picasso.with(getActivity())
+                .load(imgUrl)
+                .fit()
+                .centerInside()
+                .into(mAlbumImage);
+        }
+    }
+
+    @DebugLog
     public void onEvent(UpdateUiEvent event) {
         updateUi(event.track);
     }
@@ -173,7 +173,6 @@ public class PlayerFragment extends DialogFragment {
     @DebugLog
     public void onEvent(PlaybackPreparedEvent event) {
         mSeekBar.setMax(event.duration);
-        mPlayerService.pausePlay();
         mSeekbarUpdater.run();
     }
 
@@ -211,11 +210,15 @@ public class PlayerFragment extends DialogFragment {
     @OnClick(R.id.player_play_pause)
     public void pausePlayAction() {
         mPlayerService.pausePlay();
-        if (mHandler.hasMessages(0)) { // If we are checking for SeekBar updates
+        if (seekbarIsBeingUpdated()) { // If we are checking for SeekBar updates
             stopSeekbarUpdates();
         } else {
             mSeekbarUpdater.run();
         }
+    }
+
+    private boolean seekbarIsBeingUpdated() {
+        return mHandler.hasMessages(0);
     }
 
     @DebugLog
