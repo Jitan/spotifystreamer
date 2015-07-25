@@ -78,7 +78,11 @@ public class TrackFragment extends Fragment {
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null &&
+            savedInstanceState.getString(ARTIST_NAME_KEY) != null &&
+            savedInstanceState.getParcelableArrayList(TRACK_LIST_KEY) != null &&
+            savedInstanceState.getParcelable(STATE_KEY) != null) {
+
             setActionBarSubtitle(savedInstanceState.getString(ARTIST_NAME_KEY));
             mLastSearchResults = savedInstanceState.getParcelableArrayList(TRACK_LIST_KEY);
             mTrackAdapter.addAll(mLastSearchResults);
@@ -101,9 +105,12 @@ public class TrackFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(ARTIST_NAME_KEY, mArtist.getName());
-        outState.putParcelable(STATE_KEY, mTrackList.onSaveInstanceState());
-        outState.putParcelableArrayList(TRACK_LIST_KEY, mLastSearchResults);
+        if (mArtist != null && mTrackList != null && mLastSearchResults != null &&
+            !mLastSearchResults.isEmpty()) {
+            outState.putString(ARTIST_NAME_KEY, mArtist.getName());
+            outState.putParcelable(STATE_KEY, mTrackList.onSaveInstanceState());
+            outState.putParcelableArrayList(TRACK_LIST_KEY, mLastSearchResults);
+        }
     }
 
     private void loadTopTracks(@NonNull String artistId) {

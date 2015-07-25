@@ -64,7 +64,7 @@ public final class MainActivity extends AppCompatActivity {
             args.putBoolean(Util.IS_TWOPANE_KEY, mTwoPane);
 
             PlayerFragment playerFragment = new PlayerFragment();
-            playerFragment.setArguments(args);
+            playerFragment.setUiArguments(args);
             playerFragment.show(getSupportFragmentManager(), "dialog");
         }
     }
