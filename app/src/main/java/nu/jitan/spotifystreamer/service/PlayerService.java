@@ -7,7 +7,9 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.media.MediaMetadataCompat;
@@ -15,6 +17,8 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 import de.greenrobot.event.EventBus;
 import hugo.weaving.DebugLog;
 import java.util.ArrayList;
@@ -23,7 +27,14 @@ import nu.jitan.spotifystreamer.Util;
 import nu.jitan.spotifystreamer.model.MyTrack;
 import nu.jitan.spotifystreamer.service.events.UpdateUiEvent;
 import nu.jitan.spotifystreamer.ui.player.PlayerActivity;
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
 
+/**
+ * Service to keep music playing alive even if user navigates away from the app. Handles
+ * notifications and passes on media actions to StreamPlayer.
+ */
 public final class PlayerService extends Service {
 
     public static final String ACTION_PLAY = "action_play";
@@ -32,6 +43,7 @@ public final class PlayerService extends Service {
     public static final String ACTION_PREVIOUS = "action_previous";
     public static final String ACTION_STOP = "action_stop";
 
+    public static final int DEFAULT_NOTIFICATION_ICON = R.mipmap.ic_launcher;
     public static final int NOTIFICATION_ID = 1001;
 
     private final IBinder playerBind = new PlayerBinder();
@@ -40,6 +52,7 @@ public final class PlayerService extends Service {
     private NotificationManager mNotificationManager;
 
     private boolean foregroundNotificationStarted = false;
+    private Subscription mGetIconSubscription;
 
     @DebugLog
     @Override
@@ -62,7 +75,7 @@ public final class PlayerService extends Service {
 
         mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
             MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        mMediaSession.setPlaybackState(buildPlaybackState());
+        mMediaSession.setPlaybackState(getUpdatedPlaybackState());
         mMediaSession.setActive(true);
     }
 
@@ -71,17 +84,13 @@ public final class PlayerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         handleIntent(intent);
         if (mStreamPlayer == null) initPlayer();
+        mMediaSession.setPlaybackState(getUpdatedPlaybackState());
 
-        if (mStreamPlayer.isPlaying()) {
-            mMediaSession.setPlaybackState(buildPlaybackState());
-        } else {
-            mMediaSession.setPlaybackState(buildPlaybackState());
-        }
         return super.onStartCommand(intent, flags, startId);
     }
 
     @DebugLog
-    private PlaybackStateCompat buildPlaybackState() {
+    private PlaybackStateCompat getUpdatedPlaybackState() {
         int state;
         long action;
         float playbackSpeed;
@@ -97,11 +106,11 @@ public final class PlayerService extends Service {
         }
 
         return new PlaybackStateCompat.Builder()
-            .setActions(
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                    action |
-                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
             .setState(state, mStreamPlayer.getCurrentPosition(), playbackSpeed)
+            .setActions(
+                PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
             .build();
     }
 
@@ -128,17 +137,43 @@ public final class PlayerService extends Service {
 
     @DebugLog
     public void onEvent(UpdateUiEvent event) {
-        updateMediaSessionMetaData(event.track);
 
-        Notification updatedNotification;
-        if (event.action == ACTION_PLAY) {
-            updatedNotification = buildNotification(generateAction(R.drawable
-                .ic_action_playback_pause, "Pause", ACTION_PAUSE), event.track);
-        } else {
-            updatedNotification = buildNotification(generateAction(R.drawable
-                .ic_action_playback_play, "Play", ACTION_PLAY), event.track);
-        }
+        mGetIconSubscription = loadIconObservable(event.track.getThumbImgUrl())
+            .subscribe(
+                bitmap ->
+                {
+                    updateMediaSessionMetaData(event.track, bitmap);
+                    setNotification(
+                        buildNotification(getNotificationAction(event), event.track, bitmap));
+                }
+            );
+    }
 
+    @DebugLog
+    private void updateMediaSessionMetaData(MyTrack track) {
+        updateMediaSessionMetaData(track, BitmapFactory.decodeResource(getResources(),
+            DEFAULT_NOTIFICATION_ICON));
+    }
+
+    @DebugLog
+    private void updateMediaSessionMetaData(MyTrack track, Bitmap bitmap) {
+
+        MediaMetadataCompat.Builder metaDataBuilder = new MediaMetadataCompat.Builder();
+
+        metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, track
+            .getArtists());
+        metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, track
+            .getAlbumName());
+        metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, track
+            .getTrackName());
+        metaDataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, getDuration());
+        metaDataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
+
+        mMediaSession.setMetadata(metaDataBuilder.build());
+        mMediaSession.setPlaybackState(getUpdatedPlaybackState());
+    }
+
+    private void setNotification(Notification updatedNotification) {
         if (foregroundNotificationStarted) {
             mNotificationManager.cancel(NOTIFICATION_ID);
             mNotificationManager.notify(NOTIFICATION_ID, updatedNotification);
@@ -148,8 +183,23 @@ public final class PlayerService extends Service {
         }
     }
 
+    private NotificationCompat.Action getNotificationAction(UpdateUiEvent event) {
+        if (event.action == ACTION_PLAY) {
+            return generateAction(R.drawable.ic_action_playback_pause, "Pause", ACTION_PAUSE);
+        } else {
+            return generateAction(R.drawable.ic_action_playback_play, "Play", ACTION_PLAY);
+        }
+    }
+
     @DebugLog
     private Notification buildNotification(NotificationCompat.Action action, MyTrack track) {
+        return buildNotification(action, track, BitmapFactory.decodeResource(getResources(),
+            DEFAULT_NOTIFICATION_ICON));
+    }
+
+    @DebugLog
+    private Notification buildNotification(NotificationCompat.Action action, MyTrack track, Bitmap
+        bitmap) {
 
         Intent stopIntent = new Intent(getApplicationContext(), PlayerService.class);
         stopIntent.setAction(ACTION_STOP);
@@ -172,7 +222,7 @@ public final class PlayerService extends Service {
 
         return new NotificationCompat.Builder(this)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+            .setLargeIcon(bitmap)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setUsesChronometer(true)
             .setTicker(track.getTrackName())
@@ -200,28 +250,6 @@ public final class PlayerService extends Service {
         return new NotificationCompat.Action.Builder(icon, title, pendingIntent).build();
     }
 
-    /**
-     * Updates the lockscreen controls, if enabled.
-     */
-    @DebugLog
-    private void updateMediaSessionMetaData(MyTrack track) {
-
-        MediaMetadataCompat.Builder metaDataBuilder = new MediaMetadataCompat.Builder();
-
-        metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, track
-            .getArtists());
-        metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, track
-            .getAlbumName());
-        metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, track
-            .getTrackName());
-        metaDataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, getDuration());
-        metaDataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
-            BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-
-        mMediaSession.setPlaybackState(buildPlaybackState());
-        mMediaSession.setMetadata(metaDataBuilder.build());
-    }
-
     @DebugLog
     @Override
     public IBinder onBind(Intent intent) {
@@ -240,6 +268,7 @@ public final class PlayerService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (mStreamPlayer != null) mStreamPlayer.release();
+        if (mGetIconSubscription != null) mGetIconSubscription.unsubscribe();
         EventBus.getDefault().unregister(this);
         mMediaSession.release();
         stopForeground(true);
@@ -251,11 +280,9 @@ public final class PlayerService extends Service {
 
     @DebugLog
     public class PlayerBinder extends Binder {
-
         public PlayerService getService() {
             return PlayerService.this;
         }
-
     }
 
     @DebugLog
@@ -278,6 +305,37 @@ public final class PlayerService extends Service {
         } else {
             mStreamPlayer.onPlay();
         }
+    }
+
+    private Observable<Bitmap> loadIconObservable(final String url) {
+        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+
+            @Override
+            public void call(final Subscriber<? super Bitmap> subscriber) {
+                if (subscriber.isUnsubscribed()) {
+                    subscriber.onCompleted();
+                    return;
+                }
+                Target target = new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        subscriber.onNext(bitmap);
+                        subscriber.onCompleted();
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
+                        subscriber.onError(new Exception(" Failed to load bitmap"));
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                    }
+                };
+
+                Picasso.with(getApplicationContext()).load(url).into(target);
+            }
+        });
     }
 
     public void nextTrack() {

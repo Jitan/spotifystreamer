@@ -62,7 +62,9 @@ dependencies {
 
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'co.trikita:log:1.1.1'
-    compile 'com.annimon:stream:1.0.1'
+
+    compile 'io.reactivex:rxandroid:0.25.0'
+    compile 'io.reactivex:rxjava-async-util:0.21.0'
 
     compile 'com.github.frankiesardo:auto-parcel:0.3'
     apt 'com.github.frankiesardo:auto-parcel-processor:0.3'

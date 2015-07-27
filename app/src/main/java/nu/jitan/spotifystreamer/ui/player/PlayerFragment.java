@@ -55,7 +55,6 @@ public class PlayerFragment extends DialogFragment {
     private boolean mTwoPane;
     private boolean mPlayerBound = false;
     private boolean mSeekBarIsBeingScrolled = false;
-    private boolean paused = false, playbackPaused = false;
 
     @DebugLog
     @Override
@@ -109,11 +108,8 @@ public class PlayerFragment extends DialogFragment {
                 mPlayerService.setTrackList(mTrackList);
                 mPlayerService.setCurrentTrack(mCurrentTrackIndex);
                 updateUi(mTrackList.get(mCurrentTrackIndex));
-            } else {
-                updateUi(mPlayerService.getCurrentTrack());
             }
             mPlayerBound = true;
-
             registerEventBus();
         }
 
@@ -252,7 +248,6 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onPause() {
         super.onPause();
-        paused = true;
     }
 
     @DebugLog

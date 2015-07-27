@@ -186,7 +186,7 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
     }
 
     private void updateUi(String playServiceActionString) {
-        EventBus.getDefault().post(new UpdateUiEvent(mCurrentTrack, playServiceActionString));
+        EventBus.getDefault().postSticky(new UpdateUiEvent(mCurrentTrack, playServiceActionString));
     }
 
     public ArrayList<MyTrack> getTrackList() {
@@ -210,6 +210,7 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
     @Override
     public void onCompletion(MediaPlayer mp) {
         EventBus.getDefault().post(new PlaybackCompletedEvent());
+        onSkipToNext();
     }
 
     @DebugLog
