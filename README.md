@@ -1,9 +1,7 @@
-#Spotify Streamer
-###Music streaming application that uses [Spotify Public API](https://developer.spotify.com/web-api/)
+##Spotify Streamer
+####Music streaming application that uses [Spotify Public API](https://developer.spotify.com/web-api/)
 
 #### Part of [Android Nanodegree](https://www.udacity.com/course/android-developer-nanodegree--nd801) project portfolio.
-
-<br/>
 
 ####Features
 - **Search for Top10 tracks from any artist in Spotifys library**
