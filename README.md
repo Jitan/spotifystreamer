@@ -4,7 +4,7 @@
 Part of [Android Nanodegree](https://www.udacity.com/course/android-developer-nanodegree--nd801) project portfolio.
 
 ####Features
-- Search for Top10 tracks from any artist in Spotifys library
+- Search for Top10 tracks from any artist in Spotify's library
 - Get notification and lockscreen controls for media playback
 - Playback is run in a service so music will play even if app is closed
 - Alternative layout for larger screens like tablets.
