@@ -67,6 +67,7 @@ public final class PlayerService extends Service {
     private void initPlayer() {
         ComponentName receiver = new ComponentName(getPackageName(),
             RemoteReceiver.class.getName());
+
         mMediaSession = new MediaSessionCompat(getApplicationContext(), "PlayerService",
             receiver, null);
 
@@ -203,14 +204,14 @@ public final class PlayerService extends Service {
 
         Intent stopIntent = new Intent(getApplicationContext(), PlayerService.class);
         stopIntent.setAction(ACTION_STOP);
-        PendingIntent pendingActionStopIntent = PendingIntent.getService(getApplicationContext(), 1,
+        PendingIntent pendingActionStopIntent = PendingIntent.getService(getApplicationContext(), 0,
             stopIntent, 0);
 
         Intent openPlayerIntent = new Intent(getApplicationContext(), PlayerActivity.class);
         openPlayerIntent.putExtra(Util.TRACKLIST_KEY, mStreamPlayer.getTrackList());
         openPlayerIntent.putExtra(Util.TRACKLIST_POSITION_KEY, mStreamPlayer.getCurrentTrackIndex
             ());
-        PendingIntent pendingOpenPlayerIntent = PendingIntent.getService(getApplicationContext(), 1,
+        PendingIntent pendingOpenPlayerIntent = PendingIntent.getActivity(getApplicationContext(), 0,
             openPlayerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.MediaStyle style = new NotificationCompat.MediaStyle()
@@ -238,6 +239,7 @@ public final class PlayerService extends Service {
                 ACTION_NEXT))
             .setStyle(style)
             .build();
+
     }
 
     @DebugLog

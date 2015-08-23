@@ -234,7 +234,7 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
             case AudioManager.AUDIOFOCUS_LOSS:
                 // Lost focus for an unbounded amount of time: stop playback and release media
                 // player
-                if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
+//                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) mMediaPlayer.pause();
                 mMediaPlayer.release();
                 mMediaPlayer = null;
                 break;
