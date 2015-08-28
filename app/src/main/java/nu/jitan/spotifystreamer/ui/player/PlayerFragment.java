@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -45,6 +46,7 @@ public class PlayerFragment extends DialogFragment {
     @Bind(R.id.player_album_image) ImageView mAlbumImage;
     @Bind(R.id.player_track_name) TextView mTrackName;
     @Bind(R.id.player_seekbar) SeekBar mSeekBar;
+    @Bind(R.id.player_play_pause) Button mPlayPauseButton;
 
     private PlayerService mPlayerService;
     private Intent mStartPlayerIntent;
@@ -169,6 +171,14 @@ public class PlayerFragment extends DialogFragment {
 
     @DebugLog
     public void onEvent(UpdateUiEvent event) {
+        if (event.action.equals(PlayerService.ACTION_STOP) ||
+            event.action.equals(PlayerService.ACTION_PAUSE)) {
+            mPlayPauseButton.setBackground(getActivity().getResources()
+                .getDrawable(R.drawable.ic_action_playback_play));
+        } else {
+            mPlayPauseButton.setBackground(getActivity().getResources()
+                .getDrawable(R.drawable.ic_action_playback_pause));
+        }
         updateUi(event.track);
     }
 
