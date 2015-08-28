@@ -1,15 +1,13 @@
-#Spotify Streamer
-##Music streaming application that uses [Spotify Public API](https://developer.spotify.com/web-api/)
+##Spotify Streamer
+####Music streaming application that uses [Spotify Public API](https://developer.spotify.com/web-api/)
 
-### Part of [Android Nanodegree](https://www.udacity.com/course/android-developer-nanodegree--nd801) project portfolio.
-
-<br/>
+Part of [Android Nanodegree](https://www.udacity.com/course/android-developer-nanodegree--nd801) project portfolio.
 
 ####Features
-- **Search for Top10 tracks from any artist in Spotifys library**
-- **Get a notification and lockscreen controls for media playback **
-- **Playback is run in a service so music will play even if app is closed**
-- **Alternative layout for larger screens like tablets.**
+- Search for Top10 tracks from any artist in Spotify's library
+- Get notification and lockscreen controls for media playback
+- Playback is run in a service so music will play even if app is closed
+- Alternative layout for larger screens like tablets.
 
 ####Project description
 - [Spotify Wrapper](https://github.com/kaaes/spotify-web-api-android) was used for easy API calls to Spotify API.
