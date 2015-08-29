@@ -139,34 +139,8 @@ public class PlayerFragment extends DialogFragment {
 
     @DebugLog
     private void getStickyEvents() {
-        EventBus.getDefault().getStickyEvent(UpdateUiEvent.class);
-        EventBus.getDefault().getStickyEvent(PlaybackPreparedEvent.class);
-    }
-
-    @DebugLog
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (mStartPlayerIntent == null) {
-            mStartPlayerIntent = new Intent(getActivity(), PlayerService.class);
-        }
-
-        getActivity().startService(mStartPlayerIntent);
-        getActivity().bindService(mStartPlayerIntent, mPlayerConnection, 0);
-    }
-
-    @DebugLog
-    @Override
-    public void onResume() {
-        if (mTwoPane) {
-            WindowManager.LayoutParams params = getDialog().getWindow().getAttributes();
-            final float scale = getResources().getDisplayMetrics().density;
-
-            params.width = (int) (650 * scale + 0.5f);
-            params.height = (int) (650 * scale + 0.5f);
-            getDialog().getWindow().setAttributes(params);
-        }
-        super.onResume();
+        onEvent(EventBus.getDefault().getStickyEvent(UpdateUiEvent.class));
+        onEvent(EventBus.getDefault().getStickyEvent(PlaybackPreparedEvent.class));
     }
 
     @DebugLog
@@ -213,6 +187,32 @@ public class PlayerFragment extends DialogFragment {
     public void onEvent(NoMoreTracksEvent event) {
         Toast.makeText(getActivity(), "No more tracks in list", Toast
             .LENGTH_SHORT).show();
+    }
+
+    @DebugLog
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mStartPlayerIntent == null) {
+            mStartPlayerIntent = new Intent(getActivity(), PlayerService.class);
+        }
+
+        getActivity().startService(mStartPlayerIntent);
+        getActivity().bindService(mStartPlayerIntent, mPlayerConnection, 0);
+    }
+
+    @DebugLog
+    @Override
+    public void onResume() {
+        if (mTwoPane) {
+            WindowManager.LayoutParams params = getDialog().getWindow().getAttributes();
+            final float scale = getResources().getDisplayMetrics().density;
+
+            params.width = (int) (650 * scale + 0.5f);
+            params.height = (int) (650 * scale + 0.5f);
+            getDialog().getWindow().setAttributes(params);
+        }
+        super.onResume();
     }
 
     private Runnable mSeekbarUpdater = new Runnable() {

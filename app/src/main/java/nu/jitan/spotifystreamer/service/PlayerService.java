@@ -275,7 +275,7 @@ public final class PlayerService extends Service {
     @DebugLog
     @Override
     public boolean onUnbind(Intent intent) {
-        return false;
+        return true;
     }
 
     @DebugLog
