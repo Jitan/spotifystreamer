@@ -218,10 +218,10 @@ public final class PlayerService extends Service {
 
         NotificationCompat.MediaStyle style = new NotificationCompat.MediaStyle()
             .setMediaSession(mMediaSession.getSessionToken())
-            .setShowActionsInCompactView(0, 1, 2);
+            .setShowActionsInCompactView(0, 1, 2, 4);
 
-        style.setShowCancelButton(true);
-        style.setCancelButtonIntent(pendingActionStopIntent);
+//        style.setShowCancelButton(true);
+//        style.setCancelButtonIntent(pendingActionStopIntent);
 
         return new NotificationCompat.Builder(this)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -233,6 +233,7 @@ public final class PlayerService extends Service {
             .setContentText(track.getTrackName())
             .setDeleteIntent(pendingActionStopIntent)
             .setContentIntent(pendingOpenPlayerIntent)
+            .addAction(generateAction(R.drawable.ic_action_cancel, "Cancel", ACTION_STOP))
             .addAction(generateAction(R.drawable.ic_action_playback_prev, "Previous",
                 ACTION_PREVIOUS))
             .addAction(action)
