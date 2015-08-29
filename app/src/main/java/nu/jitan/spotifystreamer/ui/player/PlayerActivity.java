@@ -3,17 +3,22 @@ package nu.jitan.spotifystreamer.ui.player;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import de.greenrobot.event.EventBus;
 import hugo.weaving.DebugLog;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
+import nu.jitan.spotifystreamer.service.events.PlayerServiceStoppedEvent;
 
 @DebugLog
 public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
+        EventBus.getDefault().register(this);
 
         if (savedInstanceState == null) {
             Bundle args = new Bundle();
@@ -26,7 +31,9 @@ public class PlayerActivity extends AppCompatActivity {
             PlayerFragment playerFragment = (PlayerFragment) getSupportFragmentManager()
                 .findFragmentByTag(Util.PLAYERFRAGMENT_TAG);
 
-            if (playerFragment == null) {
+            if (playerFragment == null || !playerFragment.getTrackList().equals(args
+                .getParcelableArrayList(Util.TRACKLIST_KEY)))
+            {
                 playerFragment = new PlayerFragment();
             }
 
@@ -36,6 +43,20 @@ public class PlayerActivity extends AppCompatActivity {
                 .replace(R.id.player_container, playerFragment, Util.PLAYERFRAGMENT_TAG)
                 .commit();
         }
+    }
+
+    public void onEvent(PlayerServiceStoppedEvent event) {
+        getSupportFragmentManager().beginTransaction().remove(
+            getSupportFragmentManager().findFragmentByTag(Util.PLAYERFRAGMENT_TAG)
+        ).commit();
+        finish();
+
+
+//        Intent loadTracksIntent = new Intent(this, TrackActivity.class);
+//        ArtistClickedEvent artistClickedEvent = EventBus.getDefault().getStickyEvent
+// (ArtistClickedEvent.class);
+//        loadTracksIntent.putExtra(TrackFragment.ARTIST_KEY, artistClickedEvent.artist);
+//        startActivity(loadTracksIntent);
     }
 
     @Override
@@ -48,6 +69,12 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
     }
+
+    @Override
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
 }

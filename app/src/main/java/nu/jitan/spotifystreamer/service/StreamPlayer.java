@@ -93,6 +93,7 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
         if (newIndex >= 0 && newIndex < mTrackList.size()) {
             setCurrentTrack(newIndex);
             playNewTrack();
+            updateUi();
         } else {
             EventBus.getDefault().post(new NoMoreTracksEvent());
         }
@@ -105,6 +106,7 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
         if (newIndex >= 0 && newIndex < mTrackList.size()) {
             setCurrentTrack(newIndex);
             playNewTrack();
+            updateUi();
         } else {
             EventBus.getDefault().post(new NoMoreTracksEvent());
         }
@@ -123,6 +125,7 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
         super.onStop();
         Log.e("MediaPlayerService", "onStop");
         //Stop media player here
+        onPause();
         mNotificationManager.cancel(PlayerService.NOTIFICATION_ID);
         Intent intent = new Intent(mContext.getApplicationContext(), PlayerService.class);
         mContext.stopService(intent);
@@ -138,6 +141,9 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
         mMediaPlayer.release();
     }
 
+    /**
+     * Loads mCurrentTrackIndex from mTrackList and begings playback
+     */
     @DebugLog
     public void playNewTrack() {
         mTrackIsPrepared = false;
@@ -185,10 +191,6 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
         }
     }
 
-    private void updateUi(String playServiceActionString) {
-        EventBus.getDefault().postSticky(new UpdateUiEvent(mCurrentTrack, playServiceActionString));
-    }
-
     public ArrayList<MyTrack> getTrackList() {
         return mTrackList;
     }
@@ -204,6 +206,17 @@ public final class StreamPlayer extends MediaSessionCompat.Callback implements M
         EventBus.getDefault().postSticky(new PlaybackPreparedEvent(mMediaPlayer.getDuration()));
         updateUi(PlayerService.ACTION_PLAY);
         mMediaPlayer.start();
+    }
+
+    private void updateUi() {
+        if (isPlaying()) {
+            updateUi(PlayerService.ACTION_PAUSE);
+        } else {
+            updateUi(PlayerService.ACTION_PLAY);
+        }
+    }
+    private void updateUi(String playServiceActionString) {
+        EventBus.getDefault().postSticky(new UpdateUiEvent(mCurrentTrack, playServiceActionString));
     }
 
     @DebugLog

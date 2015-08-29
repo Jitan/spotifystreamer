@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import nu.jitan.spotifystreamer.R;
 import nu.jitan.spotifystreamer.Util;
 import nu.jitan.spotifystreamer.model.MyTrack;
+import nu.jitan.spotifystreamer.service.events.PlayerServiceStoppedEvent;
 import nu.jitan.spotifystreamer.service.events.UpdateUiEvent;
 import nu.jitan.spotifystreamer.ui.player.PlayerActivity;
 import rx.Observable;
@@ -51,7 +52,8 @@ public final class PlayerService extends Service {
     private MediaSessionCompat mMediaSession;
     private NotificationManager mNotificationManager;
 
-    private boolean foregroundNotificationStarted = false;
+    private boolean mForegroundNotificationStarted = false;
+    private boolean mIsRebound = false;
     private Subscription mGetIconSubscription;
 
     @DebugLog
@@ -86,7 +88,6 @@ public final class PlayerService extends Service {
         handleIntent(intent);
         if (mStreamPlayer == null) initPlayer();
         mMediaSession.setPlaybackState(getUpdatedPlaybackState());
-
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -175,12 +176,12 @@ public final class PlayerService extends Service {
     }
 
     private void setNotification(Notification updatedNotification) {
-        if (foregroundNotificationStarted) {
+        if (mForegroundNotificationStarted) {
             mNotificationManager.cancel(NOTIFICATION_ID);
             mNotificationManager.notify(NOTIFICATION_ID, updatedNotification);
         } else {
             startForeground(NOTIFICATION_ID, updatedNotification);
-            foregroundNotificationStarted = true;
+            mForegroundNotificationStarted = true;
         }
     }
 
@@ -211,7 +212,8 @@ public final class PlayerService extends Service {
         openPlayerIntent.putExtra(Util.TRACKLIST_KEY, mStreamPlayer.getTrackList());
         openPlayerIntent.putExtra(Util.TRACKLIST_POSITION_KEY, mStreamPlayer.getCurrentTrackIndex
             ());
-        PendingIntent pendingOpenPlayerIntent = PendingIntent.getActivity(getApplicationContext(), 0,
+        PendingIntent pendingOpenPlayerIntent = PendingIntent.getActivity(getApplicationContext()
+            , 0,
             openPlayerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.MediaStyle style = new NotificationCompat.MediaStyle()
@@ -261,6 +263,17 @@ public final class PlayerService extends Service {
 
     @DebugLog
     @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+        mIsRebound = true;
+    }
+
+    public boolean isRebound() {
+        return mIsRebound;
+    }
+
+    @DebugLog
+    @Override
     public boolean onUnbind(Intent intent) {
         return false;
     }
@@ -269,6 +282,10 @@ public final class PlayerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        // Let App know service is being killed so playerFragment can be closed
+        EventBus.getDefault().post(new PlayerServiceStoppedEvent());
+
         if (mStreamPlayer != null) mStreamPlayer.release();
         if (mGetIconSubscription != null) mGetIconSubscription.unsubscribe();
         EventBus.getDefault().unregister(this);
@@ -276,8 +293,12 @@ public final class PlayerService extends Service {
         stopForeground(true);
     }
 
-    public boolean isFirstLoad() {
-        return mStreamPlayer.getTrackList() != null;
+    /**
+     * Loads mCurrentTrackIndex from mTrackList and begings playback
+     */
+    @DebugLog
+    public void playNewTrack() {
+        mStreamPlayer.playNewTrack();
     }
 
     @DebugLog
@@ -293,11 +314,6 @@ public final class PlayerService extends Service {
             return mMediaSession.getController();
         }
         return null;
-    }
-
-    @DebugLog
-    public void setTrackList(ArrayList<MyTrack> trackList) {
-        mStreamPlayer.setTrackList(trackList);
     }
 
     @DebugLog
@@ -354,6 +370,15 @@ public final class PlayerService extends Service {
 
     public int getCurrentPosition() {
         return mStreamPlayer.getCurrentPosition();
+    }
+
+    public ArrayList<MyTrack> getTrackList() {
+        return mStreamPlayer.getTrackList();
+    }
+
+    @DebugLog
+    public void setTrackList(ArrayList<MyTrack> trackList) {
+        mStreamPlayer.setTrackList(trackList);
     }
 
     public void setCurrentTrack(int index) {

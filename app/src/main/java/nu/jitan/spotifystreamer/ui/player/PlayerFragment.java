@@ -2,7 +2,6 @@ package nu.jitan.spotifystreamer.ui.player;
 
 import android.app.Dialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -55,16 +54,17 @@ public class PlayerFragment extends DialogFragment {
 
     private int mCurrentTrackIndex;
     private boolean mTwoPane;
-    private boolean mPlayerBound = false;
     private boolean mSeekBarIsBeingScrolled = false;
 
     @DebugLog
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
         mHandler = new Handler();
     }
 
+    @DebugLog
     public void setUiArguments(Bundle args) {
         mTrackList = args.getParcelableArrayList(Util.TRACKLIST_KEY);
         mCurrentTrackIndex = args.getInt(Util.TRACKLIST_POSITION_KEY);
@@ -106,25 +106,41 @@ public class PlayerFragment extends DialogFragment {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mPlayerService = ((PlayerBinder) service).getService();
-            if (!mPlayerService.isFirstLoad()) {
+
+            if (mPlayerService.isRebound()) {
+                if (mTrackList.get(mCurrentTrackIndex).equals(mPlayerService.getCurrentTrack())) {
+                    getStickyEvents();
+                } else if (mTrackList.equals(mPlayerService.getTrackList())) {
+                    mPlayerService.setCurrentTrack(mCurrentTrackIndex);
+                    mPlayerService.playNewTrack();
+                }
+            } else {
                 mPlayerService.setTrackList(mTrackList);
                 mPlayerService.setCurrentTrack(mCurrentTrackIndex);
-                updateUi(mTrackList.get(mCurrentTrackIndex));
+                mPlayerService.playNewTrack();
             }
-            mPlayerBound = true;
-            registerEventBus();
+            updateUi(mTrackList.get(mCurrentTrackIndex));
+
         }
 
         @DebugLog
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mPlayerBound = false;
+            stopSeekbarUpdates();
             mPlayerService = null;
+            closePlayerFragment();
         }
     };
 
-    private void registerEventBus() {
-        EventBus.getDefault().registerSticky(this);
+    @DebugLog
+    private void closePlayerFragment() {
+        getFragmentManager().beginTransaction().remove(this);
+    }
+
+    @DebugLog
+    private void getStickyEvents() {
+        EventBus.getDefault().getStickyEvent(UpdateUiEvent.class);
+        EventBus.getDefault().getStickyEvent(PlaybackPreparedEvent.class);
     }
 
     @DebugLog
@@ -136,7 +152,7 @@ public class PlayerFragment extends DialogFragment {
         }
 
         getActivity().startService(mStartPlayerIntent);
-        getActivity().bindService(mStartPlayerIntent, mPlayerConnection, Context.BIND_AUTO_CREATE);
+        getActivity().bindService(mStartPlayerIntent, mPlayerConnection, 0);
     }
 
     @DebugLog
@@ -266,9 +282,7 @@ public class PlayerFragment extends DialogFragment {
         super.onStop();
         EventBus.getDefault().unregister(this);
         mHandler.removeCallbacks(mSeekbarUpdater);
-        if (mPlayerBound) {
-            getActivity().unbindService(mPlayerConnection);
-        }
+        getActivity().unbindService(mPlayerConnection);
     }
 
     @DebugLog
@@ -276,5 +290,9 @@ public class PlayerFragment extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
+    }
+
+    public ArrayList<MyTrack> getTrackList() {
+        return mTrackList;
     }
 }

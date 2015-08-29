@@ -65,7 +65,7 @@ public class SearchFragment extends Fragment {
     @OnItemClick(R.id.listview_search)
     public void loadArtistTracks(int position) {
         MyArtist artist = mSearchAdapter.getItem(position);
-        EventBus.getDefault().post(new ArtistClickedEvent(artist));
+        EventBus.getDefault().postSticky(new ArtistClickedEvent(artist));
     }
 
     private void searchArtist(String searchQuery) {
