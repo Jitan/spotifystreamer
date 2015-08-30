@@ -218,7 +218,7 @@ public final class PlayerService extends Service {
 
         NotificationCompat.MediaStyle style = new NotificationCompat.MediaStyle()
             .setMediaSession(mMediaSession.getSessionToken())
-            .setShowActionsInCompactView(0, 1, 2, 4);
+            .setShowActionsInCompactView(0, 1, 2);
 
 //        style.setShowCancelButton(true);
 //        style.setCancelButtonIntent(pendingActionStopIntent);
@@ -234,8 +234,8 @@ public final class PlayerService extends Service {
             .setDeleteIntent(pendingActionStopIntent)
             .setContentIntent(pendingOpenPlayerIntent)
             .addAction(generateAction(R.drawable.ic_action_cancel, "Cancel", ACTION_STOP))
-            .addAction(generateAction(R.drawable.ic_action_playback_prev, "Previous",
-                ACTION_PREVIOUS))
+//            .addAction(generateAction(R.drawable.ic_action_playback_prev, "Previous",
+//                ACTION_PREVIOUS))
             .addAction(action)
             .addAction(generateAction(R.drawable.ic_action_playback_next,
                 "Next",

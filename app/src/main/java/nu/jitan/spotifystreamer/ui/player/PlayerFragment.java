@@ -134,7 +134,7 @@ public class PlayerFragment extends DialogFragment {
 
     @DebugLog
     private void closePlayerFragment() {
-        getFragmentManager().beginTransaction().remove(this);
+        getFragmentManager().beginTransaction().remove(this).commit();
     }
 
     @DebugLog
