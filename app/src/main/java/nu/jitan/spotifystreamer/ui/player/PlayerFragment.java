@@ -113,14 +113,13 @@ public class PlayerFragment extends DialogFragment {
                 } else if (mTrackList.equals(mPlayerService.getTrackList())) {
                     mPlayerService.setCurrentTrack(mCurrentTrackIndex);
                     mPlayerService.playNewTrack();
+                } else {
+                    loadNewTrackListAndPlay();
                 }
             } else {
-                mPlayerService.setTrackList(mTrackList);
-                mPlayerService.setCurrentTrack(mCurrentTrackIndex);
-                mPlayerService.playNewTrack();
+                loadNewTrackListAndPlay();
             }
             updateUi(mTrackList.get(mCurrentTrackIndex));
-
         }
 
         @DebugLog
@@ -131,6 +130,12 @@ public class PlayerFragment extends DialogFragment {
             closePlayerFragment();
         }
     };
+
+    private void loadNewTrackListAndPlay() {
+        mPlayerService.setTrackList(mTrackList);
+        mPlayerService.setCurrentTrack(mCurrentTrackIndex);
+        mPlayerService.playNewTrack();
+    }
 
     @DebugLog
     private void closePlayerFragment() {
