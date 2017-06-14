@@ -17,22 +17,26 @@ Project description
 
 
 Screenshots
-Player
+Player 
+
 <img src="screenshots/spotify_player.jpg" width="300"/>
 <br/>
 <br/>
 
-Search & Top10 Tracks
+Search & Top10 Tracks 
+
 <img src="screenshots/spotify_search.jpg" width="300"/> <img src="screenshots/spotify_top10.jpg" width="300"/>
 <br/>
 <br/>
 
-Notification & Lockscreen
+Notification & Lockscreen 
+
 <img src="screenshots/spotify_notification.jpg" width="300"/> <img src="screenshots/spotify_lockscreen.jpg" width="300"/>
 <br/>
 <br/>
 
-Alternative layout for larger screens
+Alternative layout for larger screens 
+
 <img src="screenshots/spotify_tablet.jpg" width="650"/>
 <br />  
 
