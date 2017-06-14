@@ -16,7 +16,7 @@ Part of [Android Nanodegree](https://www.udacity.com/course/android-developer-na
 - [Greenrobot Eventbus](https://github.com/greenrobot/EventBus) for handling communication between different activites and services.
 
 
-**Screenshots**
+**Screenshots**  
 Player 
 
 <img src="screenshots/spotify_player.jpg" width="300"/>
